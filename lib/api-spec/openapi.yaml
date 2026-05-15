@@ -3,13 +3,25 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Arboun - Saudi earnest money management platform
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: deals
+    description: Earnest money deals
+  - name: users
+    description: User management
+  - name: contracts
+    description: Digital contracts
+  - name: disputes
+    description: Dispute resolution
+  - name: templates
+    description: Contract templates
+  - name: dashboard
+    description: Dashboard and analytics
 paths:
   /healthz:
     get:
@@ -24,6 +36,361 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /users/me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateMe
+      tags: [users]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /deals:
+    get:
+      operationId: listDeals
+      tags: [deals]
+      summary: List all deals for current user
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, active, completed, cancelled, disputed, refunded, forfeited]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [real_estate, vehicle, business, other]
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [buyer, seller]
+      responses:
+        "200":
+          description: List of deals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Deal"
+    post:
+      operationId: createDeal
+      tags: [deals]
+      summary: Create a new earnest money deal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealInput"
+      responses:
+        "201":
+          description: Created deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/{id}:
+    get:
+      operationId: getDeal
+      tags: [deals]
+      summary: Get deal details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deal details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateDeal
+      tags: [deals]
+      summary: Update deal details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealUpdate"
+      responses:
+        "200":
+          description: Updated deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+    delete:
+      operationId: deleteDeal
+      tags: [deals]
+      summary: Delete a pending deal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /deals/{id}/complete:
+    post:
+      operationId: completeDeal
+      tags: [deals]
+      summary: Mark deal as completed and release funds to seller
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Completed deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/{id}/cancel:
+    post:
+      operationId: cancelDeal
+      tags: [deals]
+      summary: Cancel deal and refund earnest money to buyer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CancelInput"
+      responses:
+        "200":
+          description: Cancelled deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/{id}/forfeit:
+    post:
+      operationId: forfeitDeal
+      tags: [deals]
+      summary: Forfeit earnest money to seller (buyer withdraws)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CancelInput"
+      responses:
+        "200":
+          description: Forfeited deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/{id}/contract:
+    get:
+      operationId: getDealContract
+      tags: [contracts]
+      summary: Get contract for a deal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contract details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+
+  /deals/{id}/contract/sign:
+    post:
+      operationId: signContract
+      tags: [contracts]
+      summary: Sign the deal contract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Signed contract
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+
+  /deals/{id}/dispute:
+    get:
+      operationId: getDealDispute
+      tags: [disputes]
+      summary: Get dispute for a deal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dispute details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dispute"
+    post:
+      operationId: createDispute
+      tags: [disputes]
+      summary: Open a dispute for a deal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DisputeInput"
+      responses:
+        "201":
+          description: Created dispute
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dispute"
+
+  /deals/{id}/timeline:
+    get:
+      operationId: getDealTimeline
+      tags: [deals]
+      summary: Get activity timeline for a deal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Timeline events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimelineEvent"
+
+  /templates:
+    get:
+      operationId: listTemplates
+      tags: [templates]
+      summary: List contract templates by deal type
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [real_estate, vehicle, business, other]
+      responses:
+        "200":
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Template"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats for current user
+      responses:
+        "200":
+          description: Summary stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity feed across all deals
+      responses:
+        "200":
+          description: Recent activity events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityEvent"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +401,260 @@ components:
       required:
         - status
 
+    User:
+      type: object
+      required: [id, name, phone, nationalId, verified, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: ["string", "null"]
+        nationalId:
+          type: string
+        verified:
+          type: boolean
+        createdAt:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+
+    Deal:
+      type: object
+      required: [id, title, type, status, amount, currency, buyerId, sellerId, buyerName, sellerName, description, deadline, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+          enum: [real_estate, vehicle, business, other]
+        status:
+          type: string
+          enum: [pending, active, completed, cancelled, disputed, refunded, forfeited]
+        amount:
+          type: number
+        currency:
+          type: string
+        buyerId:
+          type: integer
+        sellerId:
+          type: integer
+        buyerName:
+          type: string
+        sellerName:
+          type: string
+        description:
+          type: string
+        propertyAddress:
+          type: ["string", "null"]
+        vehicleInfo:
+          type: ["string", "null"]
+        deadline:
+          type: string
+        platformFee:
+          type: number
+        buyerSigned:
+          type: boolean
+        sellerSigned:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    DealInput:
+      type: object
+      required: [title, type, amount, sellerPhone, description, deadline]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [real_estate, vehicle, business, other]
+        amount:
+          type: number
+          minimum: 1
+        sellerPhone:
+          type: string
+        description:
+          type: string
+        propertyAddress:
+          type: string
+        vehicleInfo:
+          type: string
+        deadline:
+          type: string
+        templateId:
+          type: ["integer", "null"]
+
+    DealUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+        deadline:
+          type: string
+
+    CancelInput:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+
+    Contract:
+      type: object
+      required: [id, dealId, terms, buyerSigned, sellerSigned, createdAt]
+      properties:
+        id:
+          type: integer
+        dealId:
+          type: integer
+        terms:
+          type: string
+        refundConditions:
+          type: string
+        forfeitureConditions:
+          type: string
+        buyerSigned:
+          type: boolean
+        sellerSigned:
+          type: boolean
+        buyerSignedAt:
+          type: ["string", "null"]
+        sellerSignedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    Dispute:
+      type: object
+      required: [id, dealId, reason, status, openedBy, createdAt]
+      properties:
+        id:
+          type: integer
+        dealId:
+          type: integer
+        reason:
+          type: string
+        evidence:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [open, under_review, resolved_buyer, resolved_seller, closed]
+        resolution:
+          type: ["string", "null"]
+        openedBy:
+          type: integer
+        resolvedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    DisputeInput:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+        evidence:
+          type: string
+
+    TimelineEvent:
+      type: object
+      required: [id, dealId, event, description, createdAt]
+      properties:
+        id:
+          type: integer
+        dealId:
+          type: integer
+        event:
+          type: string
+        description:
+          type: string
+        actorName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ActivityEvent:
+      type: object
+      required: [id, dealId, dealTitle, event, description, createdAt]
+      properties:
+        id:
+          type: integer
+        dealId:
+          type: integer
+        dealTitle:
+          type: string
+        event:
+          type: string
+        description:
+          type: string
+        amount:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+
+    Template:
+      type: object
+      required: [id, name, type, description, terms, refundConditions, forfeitureConditions]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+          enum: [real_estate, vehicle, business, other]
+        description:
+          type: string
+        terms:
+          type: string
+        refundConditions:
+          type: string
+        forfeitureConditions:
+          type: string
+
+    DashboardSummary:
+      type: object
+      required: [totalDeals, activeDeals, completedDeals, disputedDeals, totalAmountEscrowed, totalAmountCompleted, pendingSignature]
+      properties:
+        totalDeals:
+          type: integer
+        activeDeals:
+          type: integer
+        completedDeals:
+          type: integer
+        disputedDeals:
+          type: integer
+        cancelledDeals:
+          type: integer
+        totalAmountEscrowed:
+          type: number
+        totalAmountCompleted:
+          type: number
+        pendingSignature:
+          type: integer
+        dealsAsbuyer:
+          type: integer
+        dealsAsSeller:
+          type: integer
