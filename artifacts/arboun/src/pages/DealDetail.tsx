@@ -333,7 +333,7 @@ export default function DealDetail({ id }: Props) {
                   </Link>
                 )}
                 {isBuyer && deal.transferStatus !== "listed" && deal.status === "active" && (
-                  <Button variant="outline" onClick={() => setActiveAction("list")} className="gap-1.5 border-indigo-300 text-indigo-700 hover:bg-indigo-50">
+                  <Button variant="outline" onClick={() => { setActiveAction("list"); setListPrice(String(deal.amount ?? "")); }} className="gap-1.5 border-indigo-300 text-indigo-700 hover:bg-indigo-50">
                     <Tag className="w-4 h-4" />
                     عرض للتنازل
                   </Button>
