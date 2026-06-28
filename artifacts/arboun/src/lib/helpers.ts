@@ -32,8 +32,8 @@ export const typeIcon: Record<string, string> = {
   other: "📄",
 };
 
-export function formatAmount(amount: number | string): string {
-  const n = Number(amount);
+export function formatAmount(amount: number | string | null | undefined): string {
+  const n = Number(amount ?? 0);
   return n.toLocaleString("ar-SA") + " ر.س";
 }
 

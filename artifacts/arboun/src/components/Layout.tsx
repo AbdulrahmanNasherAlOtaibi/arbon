@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FileText, FileSignature, User, PlusCircle } from "lucide-react";
+import { LayoutDashboard, FileText, FileSignature, Store, User, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetMe } from "@workspace/api-client-react";
 import { Button } from "./ui/button";
@@ -11,6 +11,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/", label: "لوحة القيادة", icon: LayoutDashboard },
     { href: "/deals", label: "الصفقات", icon: FileText },
+    { href: "/transfers/marketplace", label: "سوق التنازلات", icon: Store },
     { href: "/templates", label: "النماذج", icon: FileSignature },
     { href: "/profile", label: "الملف الشخصي", icon: User },
   ];

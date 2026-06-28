@@ -19,7 +19,7 @@ export default function OpenDispute({ id }: Props) {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
 
-  const { data: deal, isLoading } = useGetDeal(id, { query: { enabled: !!id } });
+  const { data: deal, isLoading } = useGetDeal(id);
   const createDispute = useCreateDispute();
 
   const [reason, setReason] = useState("");

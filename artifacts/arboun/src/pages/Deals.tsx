@@ -175,7 +175,7 @@ export default function Deals() {
                       </div>
                       <div className="text-left shrink-0">
                         <p className="text-xl font-bold text-primary">{formatAmount(deal.amount)}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">رسوم: {formatAmount(deal.platformFee)}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">رسوم: {formatAmount(deal.platformFee ?? 0)}</p>
                         <div className="flex items-center gap-1 mt-2 text-muted-foreground">
                           <ChevronLeft className="w-4 h-4" />
                         </div>

@@ -77,6 +77,9 @@ export const ListDealsResponseItem = zod.object({
   "platformFee": zod.number().optional(),
   "buyerSigned": zod.boolean().optional(),
   "sellerSigned": zod.boolean().optional(),
+  "transferStatus": zod.enum(['not_listed', 'listed', 'transferred']).optional(),
+  "transferPrice": zod.number().nullish(),
+  "transferDescription": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -128,6 +131,9 @@ export const GetDealResponse = zod.object({
   "platformFee": zod.number().optional(),
   "buyerSigned": zod.boolean().optional(),
   "sellerSigned": zod.boolean().optional(),
+  "transferStatus": zod.enum(['not_listed', 'listed', 'transferred']).optional(),
+  "transferPrice": zod.number().nullish(),
+  "transferDescription": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -165,6 +171,9 @@ export const UpdateDealResponse = zod.object({
   "platformFee": zod.number().optional(),
   "buyerSigned": zod.boolean().optional(),
   "sellerSigned": zod.boolean().optional(),
+  "transferStatus": zod.enum(['not_listed', 'listed', 'transferred']).optional(),
+  "transferPrice": zod.number().nullish(),
+  "transferDescription": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -203,6 +212,9 @@ export const CompleteDealResponse = zod.object({
   "platformFee": zod.number().optional(),
   "buyerSigned": zod.boolean().optional(),
   "sellerSigned": zod.boolean().optional(),
+  "transferStatus": zod.enum(['not_listed', 'listed', 'transferred']).optional(),
+  "transferPrice": zod.number().nullish(),
+  "transferDescription": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -240,6 +252,9 @@ export const CancelDealResponse = zod.object({
   "platformFee": zod.number().optional(),
   "buyerSigned": zod.boolean().optional(),
   "sellerSigned": zod.boolean().optional(),
+  "transferStatus": zod.enum(['not_listed', 'listed', 'transferred']).optional(),
+  "transferPrice": zod.number().nullish(),
+  "transferDescription": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -277,6 +292,9 @@ export const ForfeitDealResponse = zod.object({
   "platformFee": zod.number().optional(),
   "buyerSigned": zod.boolean().optional(),
   "sellerSigned": zod.boolean().optional(),
+  "transferStatus": zod.enum(['not_listed', 'listed', 'transferred']).optional(),
+  "transferPrice": zod.number().nullish(),
+  "transferDescription": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -411,6 +429,182 @@ export const GetDashboardSummaryResponse = zod.object({
   "pendingSignature": zod.number(),
   "dealsAsbuyer": zod.number().optional(),
   "dealsAsSeller": zod.number().optional()
+})
+
+
+/**
+ * @summary Browse deals available for transfer
+ */
+export const ListMarketplaceDealsQueryParams = zod.object({
+  "type": zod.enum(['real_estate', 'vehicle', 'business', 'other']).optional()
+})
+
+export const ListMarketplaceDealsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "type": zod.enum(['real_estate', 'vehicle', 'business', 'other']),
+  "amount": zod.number(),
+  "transferPrice": zod.number(),
+  "description": zod.string().nullish(),
+  "propertyAddress": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "buyerName": zod.string(),
+  "sellerName": zod.string(),
+  "deadline": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListMarketplaceDealsResponse = zod.array(ListMarketplaceDealsResponseItem)
+
+
+/**
+ * @summary Get my deals listed for transfer
+ */
+export const GetMyListedDealsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "type": zod.enum(['real_estate', 'vehicle', 'business', 'other']),
+  "amount": zod.number(),
+  "transferPrice": zod.number(),
+  "description": zod.string().nullish(),
+  "propertyAddress": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "buyerName": zod.string(),
+  "sellerName": zod.string(),
+  "deadline": zod.string(),
+  "createdAt": zod.string()
+})
+export const GetMyListedDealsResponse = zod.array(GetMyListedDealsResponseItem)
+
+
+/**
+ * @summary Get transfer requests for my deals
+ */
+export const GetTransferRequestsResponseItem = zod.object({
+  "id": zod.number(),
+  "dealId": zod.number(),
+  "fromUserId": zod.number(),
+  "toUserId": zod.number(),
+  "fromUserName": zod.string(),
+  "toUserName": zod.string(),
+  "price": zod.number(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "createdAt": zod.string()
+})
+export const GetTransferRequestsResponse = zod.array(GetTransferRequestsResponseItem)
+
+
+/**
+ * @summary List a deal for public transfer
+ */
+export const ListForTransferParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListForTransferBody = zod.object({
+  "price": zod.number().optional(),
+  "description": zod.string().optional()
+})
+
+export const ListForTransferResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "type": zod.enum(['real_estate', 'vehicle', 'business', 'other']),
+  "status": zod.enum(['pending', 'active', 'completed', 'cancelled', 'disputed', 'refunded', 'forfeited']),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "buyerId": zod.number(),
+  "sellerId": zod.number(),
+  "buyerName": zod.string(),
+  "sellerName": zod.string(),
+  "description": zod.string(),
+  "propertyAddress": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "deadline": zod.string(),
+  "platformFee": zod.number().optional(),
+  "buyerSigned": zod.boolean().optional(),
+  "sellerSigned": zod.boolean().optional(),
+  "transferStatus": zod.enum(['not_listed', 'listed', 'transferred']).optional(),
+  "transferPrice": zod.number().nullish(),
+  "transferDescription": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Remove deal from transfer marketplace
+ */
+export const UnlistForTransferParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UnlistForTransferResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "type": zod.enum(['real_estate', 'vehicle', 'business', 'other']),
+  "status": zod.enum(['pending', 'active', 'completed', 'cancelled', 'disputed', 'refunded', 'forfeited']),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "buyerId": zod.number(),
+  "sellerId": zod.number(),
+  "buyerName": zod.string(),
+  "sellerName": zod.string(),
+  "description": zod.string(),
+  "propertyAddress": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "deadline": zod.string(),
+  "platformFee": zod.number().optional(),
+  "buyerSigned": zod.boolean().optional(),
+  "sellerSigned": zod.boolean().optional(),
+  "transferStatus": zod.enum(['not_listed', 'listed', 'transferred']).optional(),
+  "transferPrice": zod.number().nullish(),
+  "transferDescription": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Request to take over a listed deal
+ */
+export const RequestTransferParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const requestTransferBodyPriceMin = 0;
+
+
+
+export const RequestTransferBody = zod.object({
+  "dealId": zod.number(),
+  "price": zod.number().min(requestTransferBodyPriceMin),
+  "message": zod.string().optional()
+})
+
+
+/**
+ * @summary Approve or reject a transfer request
+ */
+export const ApproveTransferParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ApproveTransferBody = zod.object({
+  "approved": zod.boolean()
+})
+
+export const ApproveTransferResponse = zod.object({
+  "id": zod.number(),
+  "dealId": zod.number(),
+  "fromUserId": zod.number(),
+  "toUserId": zod.number(),
+  "fromUserName": zod.string(),
+  "toUserName": zod.string(),
+  "price": zod.number(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "createdAt": zod.string()
 })
 
 

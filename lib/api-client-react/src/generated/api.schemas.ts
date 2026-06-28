@@ -48,6 +48,15 @@ export const DealStatus = {
   forfeited: 'forfeited',
 } as const;
 
+export type DealTransferStatus = typeof DealTransferStatus[keyof typeof DealTransferStatus];
+
+
+export const DealTransferStatus = {
+  not_listed: 'not_listed',
+  listed: 'listed',
+  transferred: 'transferred',
+} as const;
+
 export interface Deal {
   id: number;
   title: string;
@@ -68,6 +77,11 @@ export interface Deal {
   platformFee?: number;
   buyerSigned?: boolean;
   sellerSigned?: boolean;
+  transferStatus?: DealTransferStatus;
+  /** @nullable */
+  transferPrice?: number | null;
+  /** @nullable */
+  transferDescription?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -150,6 +164,11 @@ export interface Dispute {
   createdAt: string;
 }
 
+export interface ListForTransferBody {
+  price?: number;
+  description?: string;
+}
+
 export interface DisputeInput {
   /** @minLength 1 */
   reason: string;
@@ -210,6 +229,68 @@ export interface DashboardSummary {
   dealsAsSeller?: number;
 }
 
+export type TransferRequestStatus = typeof TransferRequestStatus[keyof typeof TransferRequestStatus];
+
+
+export const TransferRequestStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface TransferRequest {
+  id: number;
+  dealId: number;
+  fromUserId: number;
+  toUserId: number;
+  fromUserName: string;
+  toUserName: string;
+  price: number;
+  /** @nullable */
+  message?: string | null;
+  status: TransferRequestStatus;
+  createdAt: string;
+}
+
+export interface TransferRequestInput {
+  dealId: number;
+  /** @minimum 0 */
+  price: number;
+  message?: string;
+}
+
+export interface TransferApprovalInput {
+  approved: boolean;
+}
+
+export type TransferableDealType = typeof TransferableDealType[keyof typeof TransferableDealType];
+
+
+export const TransferableDealType = {
+  real_estate: 'real_estate',
+  vehicle: 'vehicle',
+  business: 'business',
+  other: 'other',
+} as const;
+
+export interface TransferableDeal {
+  id: number;
+  title: string;
+  type: TransferableDealType;
+  amount: number;
+  transferPrice: number;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  propertyAddress?: string | null;
+  /** @nullable */
+  vehicleInfo?: string | null;
+  buyerName: string;
+  sellerName: string;
+  deadline: string;
+  createdAt: string;
+}
+
 export type ListDealsParams = {
 status?: ListDealsStatus;
 type?: ListDealsType;
@@ -255,6 +336,20 @@ export type ListTemplatesType = typeof ListTemplatesType[keyof typeof ListTempla
 
 
 export const ListTemplatesType = {
+  real_estate: 'real_estate',
+  vehicle: 'vehicle',
+  business: 'business',
+  other: 'other',
+} as const;
+
+export type ListMarketplaceDealsParams = {
+type?: ListMarketplaceDealsType;
+};
+
+export type ListMarketplaceDealsType = typeof ListMarketplaceDealsType[keyof typeof ListMarketplaceDealsType];
+
+
+export const ListMarketplaceDealsType = {
   real_estate: 'real_estate',
   vehicle: 'vehicle',
   business: 'business',

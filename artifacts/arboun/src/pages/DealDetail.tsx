@@ -10,6 +10,8 @@ import {
   useCancelDeal,
   useForfeitDeal,
   useGetMe,
+  useListForTransfer,
+  useUnlistForTransfer,
   getGetDealQueryKey,
   getGetDashboardSummaryQueryKey,
   getGetRecentActivityQueryKey,
@@ -24,32 +26,36 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { formatAmount, formatDate, formatDateTime, statusLabel, statusColor, typeLabel, disputeStatusLabel } from "@/lib/helpers";
 import {
   Shield, CheckCircle, XCircle, AlertCircle, Clock, FileText,
-  User, ChevronLeft, Calendar, DollarSign, Building2
+  User, ChevronLeft, Calendar, DollarSign, Building2, Tag
 } from "lucide-react";
 
 interface Props {
   id: number;
 }
 
-type ActionType = "complete" | "cancel" | "forfeit" | null;
+type ActionType = "complete" | "cancel" | "forfeit" | "list" | null;
 
 export default function DealDetail({ id }: Props) {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
 
-  const { data: deal, isLoading } = useGetDeal(id, { query: { enabled: !!id } });
-  const { data: contract } = useGetDealContract(id, { query: { enabled: !!id } });
-  const { data: timeline } = useGetDealTimeline(id, { query: { enabled: !!id } });
+  const { data: deal, isLoading } = useGetDeal(id);
+  const { data: contract } = useGetDealContract(id);
+  const { data: timeline } = useGetDealTimeline(id);
   const { data: me } = useGetMe();
 
   const signContract = useSignContract();
   const completeDeal = useCompleteDeal();
   const cancelDeal = useCancelDeal();
   const forfeitDeal = useForfeitDeal();
+  const listForTransfer = useListForTransfer();
+  const unlistForTransfer = useUnlistForTransfer();
 
   const [activeAction, setActiveAction] = useState<ActionType>(null);
   const [reason, setReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [listPrice, setListPrice] = useState("");
+  const [listDesc, setListDesc] = useState("");
 
   async function invalidate() {
     await Promise.all([
@@ -65,6 +71,27 @@ export default function DealDetail({ id }: Props) {
   }
 
   async function handleAction() {
+    if (activeAction === "list") {
+      setActionLoading(true);
+      try {
+        await listForTransfer.mutateAsync({
+          id,
+          data: {
+            ...(listPrice ? { price: Number(listPrice) } : {}),
+            ...(listDesc ? { description: listDesc } : {}),
+          },
+        });
+        await invalidate();
+        await queryClient.invalidateQueries({ queryKey: ["getMyListedDeals"] });
+        setActiveAction(null);
+        setListPrice("");
+        setListDesc("");
+      } finally {
+        setActionLoading(false);
+      }
+      return;
+    }
+
     if (!reason.trim()) return;
     setActionLoading(true);
     try {
@@ -117,12 +144,14 @@ export default function DealDetail({ id }: Props) {
     complete: "تأكيد إتمام الصفقة",
     cancel: "إلغاء الصفقة وإسترجاع العربون",
     forfeit: "الانسحاب ومصادرة العربون للبائع",
+    list: "عرض الصفقة في سوق التنازلات",
   };
 
   const actionColors: Record<string, string> = {
     complete: "bg-teal-600 hover:bg-teal-700 text-white",
     cancel: "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
     forfeit: "bg-red-900 hover:bg-red-800 text-white",
+    list: "bg-indigo-600 hover:bg-indigo-700 text-white",
   };
 
   const timelineIcons: Record<string, string> = {
@@ -172,7 +201,7 @@ export default function DealDetail({ id }: Props) {
                 <div>
                   <p className="text-sm text-muted-foreground">مبلغ العربون المحجوز</p>
                   <p className="text-3xl font-bold text-primary">{formatAmount(deal.amount)}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">رسوم المنصة (٢٪): {formatAmount(deal.platformFee)} · العملة: {deal.currency}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">رسوم المنصة (٢٪): {formatAmount(deal.platformFee ?? 0)} · العملة: {deal.currency}</p>
                 </div>
               </div>
               <div className="text-right">
@@ -303,6 +332,27 @@ export default function DealDetail({ id }: Props) {
                     </Button>
                   </Link>
                 )}
+                {isBuyer && deal.transferStatus !== "listed" && deal.status === "active" && (
+                  <Button variant="outline" onClick={() => setActiveAction("list")} className="gap-1.5 border-indigo-300 text-indigo-700 hover:bg-indigo-50">
+                    <Tag className="w-4 h-4" />
+                    عرض للتنازل
+                  </Button>
+                )}
+                {isBuyer && deal.transferStatus === "listed" && (
+                  <Button variant="outline" disabled className="gap-1.5 border-indigo-300 text-indigo-700 bg-indigo-50">
+                    <Tag className="w-4 h-4" />
+                    معروضة للتنازل
+                  </Button>
+                )}
+                {isBuyer && deal.transferStatus === "listed" && (
+                  <Button variant="outline" onClick={async () => {
+                    await unlistForTransfer.mutateAsync({ id });
+                    await invalidate();
+                    await queryClient.invalidateQueries({ queryKey: ["getMyListedDeals"] });
+                  }} disabled={unlistForTransfer.isPending} className="gap-1.5 border-gray-300 text-gray-700 hover:bg-gray-50">
+                    إلغاء العرض
+                  </Button>
+                )}
               </div>
               <p className="text-xs text-muted-foreground mt-3">
                 عند الإتمام يُحوَّل المبلغ تلقائياً للبائع. عند الإلغاء يُعاد للمشتري. عند الانسحاب يُصادر للبائع.
@@ -340,7 +390,7 @@ export default function DealDetail({ id }: Props) {
         )}
 
         {/* Action Dialog */}
-        <Dialog open={!!activeAction} onOpenChange={(open) => { if (!open) { setActiveAction(null); setReason(""); } }}>
+        <Dialog open={!!activeAction} onOpenChange={(open) => { if (!open) { setActiveAction(null); setReason(""); setListPrice(""); setListDesc(""); } }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{activeAction ? actionLabels[activeAction] : ""}</DialogTitle>
@@ -350,6 +400,32 @@ export default function DealDetail({ id }: Props) {
                 <p className="text-sm text-muted-foreground">
                   بتأكيدك سيتم تحويل مبلغ {formatAmount(deal.amount)} للبائع تلقائياً. هذا الإجراء لا يمكن التراجع عنه.
                 </p>
+              ) : activeAction === "list" ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    اكتب سعر التنازل والوصف، ثم أكّد لعرض الصفقة في سوق التنازلات. المشترون الجدد يمكنهم طلب التنازل منك.
+                  </p>
+                  <div>
+                    <label className="text-xs font-medium mb-1 block">سعر التنازل (ريال)</label>
+                    <input
+                      type="number"
+                      placeholder="مثلاً: 50000"
+                      value={listPrice}
+                      onChange={(e) => setListPrice(e.target.value)}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      min={1}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium mb-1 block">وصف إضافي</label>
+                    <Textarea
+                      placeholder="اكتب تفاصيل إضافية عن التنازل..."
+                      value={listDesc}
+                      onChange={(e) => setListDesc(e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                </>
               ) : (
                 <>
                   <p className="text-sm text-muted-foreground">
@@ -367,7 +443,7 @@ export default function DealDetail({ id }: Props) {
               )}
             </div>
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => { setActiveAction(null); setReason(""); }}>إلغاء</Button>
+              <Button variant="outline" onClick={() => { setActiveAction(null); setReason(""); setListPrice(""); setListDesc(""); }}>إلغاء</Button>
               <Button
                 onClick={() => {
                   if (activeAction === "complete") {
@@ -375,7 +451,7 @@ export default function DealDetail({ id }: Props) {
                   }
                   handleAction();
                 }}
-                disabled={actionLoading || (activeAction !== "complete" && !reason.trim())}
+                disabled={actionLoading || (activeAction !== "complete" && activeAction !== "list" && !reason.trim())}
                 className={activeAction ? actionColors[activeAction] : ""}
               >
                 {actionLoading ? "جاري التنفيذ..." : "تأكيد"}

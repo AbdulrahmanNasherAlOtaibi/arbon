@@ -6,6 +6,7 @@ import contractsRouter from "./contracts";
 import disputesRouter from "./disputes";
 import dashboardRouter from "./dashboard";
 import templatesRouter from "./templates";
+import transfersRouter from "./transfers";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(contractsRouter);
 router.use(disputesRouter);
 router.use(dashboardRouter);
 router.use(templatesRouter);
+router.use(transfersRouter);
 
 export default router;

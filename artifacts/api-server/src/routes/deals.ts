@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, or, sql } from "drizzle-orm";
-import { db, dealsTable, usersTable, contractsTable, timelineTable } from "@workspace/db";
+import { db, dealsTable, usersTable, contractsTable, timelineTable, transferRequestsTable } from "@workspace/db";
 import {
   ListDealsQueryParams,
   ListDealsResponse,

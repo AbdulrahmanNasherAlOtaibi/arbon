@@ -10,6 +10,9 @@ import DealDetail from "@/pages/DealDetail";
 import OpenDispute from "@/pages/OpenDispute";
 import Templates from "@/pages/Templates";
 import Profile from "@/pages/Profile";
+import TransferMarketplace from "@/pages/TransferMarketplace";
+import MyListings from "@/pages/MyListings";
+import TransferRequests from "@/pages/TransferRequests";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +37,9 @@ function Router() {
       </Route>
       <Route path="/templates" component={Templates} />
       <Route path="/profile" component={Profile} />
+      <Route path="/transfers/marketplace" component={TransferMarketplace} />
+      <Route path="/transfers/my-listings" component={MyListings} />
+      <Route path="/transfers/requests" component={TransferRequests} />
       <Route component={NotFound} />
     </Switch>
   );

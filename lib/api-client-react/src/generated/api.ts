@@ -31,9 +31,15 @@ import type {
   DisputeInput,
   HealthStatus,
   ListDealsParams,
+  ListForTransferBody,
+  ListMarketplaceDealsParams,
   ListTemplatesParams,
   Template,
   TimelineEvent,
+  TransferApprovalInput,
+  TransferRequest,
+  TransferRequestInput,
+  TransferableDeal,
   User,
   UserUpdate
 } from './api.schemas';
@@ -1397,6 +1403,530 @@ export function useGetDashboardSummary<TData = Awaited<ReturnType<typeof getDash
 
 
 
+
+export const getListMarketplaceDealsUrl = (params?: ListMarketplaceDealsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/transfers/marketplace?${stringifiedParams}` : `/api/transfers/marketplace`
+}
+
+/**
+ * @summary Browse deals available for transfer
+ */
+export const listMarketplaceDeals = async (params?: ListMarketplaceDealsParams, options?: RequestInit): Promise<TransferableDeal[]> => {
+
+  return customFetch<TransferableDeal[]>(getListMarketplaceDealsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMarketplaceDealsQueryKey = (params?: ListMarketplaceDealsParams,) => {
+    return [
+    `/api/transfers/marketplace`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListMarketplaceDealsQueryOptions = <TData = Awaited<ReturnType<typeof listMarketplaceDeals>>, TError = ErrorType<unknown>>(params?: ListMarketplaceDealsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMarketplaceDeals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMarketplaceDealsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMarketplaceDeals>>> = ({ signal }) => listMarketplaceDeals(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMarketplaceDeals>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListMarketplaceDealsQueryResult = NonNullable<Awaited<ReturnType<typeof listMarketplaceDeals>>>
+export type ListMarketplaceDealsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Browse deals available for transfer
+ */
+
+export function useListMarketplaceDeals<TData = Awaited<ReturnType<typeof listMarketplaceDeals>>, TError = ErrorType<unknown>>(
+ params?: ListMarketplaceDealsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMarketplaceDeals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListMarketplaceDealsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetMyListedDealsUrl = () => {
+
+
+
+
+  return `/api/transfers/my-listings`
+}
+
+/**
+ * @summary Get my deals listed for transfer
+ */
+export const getMyListedDeals = async ( options?: RequestInit): Promise<TransferableDeal[]> => {
+
+  return customFetch<TransferableDeal[]>(getGetMyListedDealsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyListedDealsQueryKey = () => {
+    return [
+    `/api/transfers/my-listings`
+    ] as const;
+    }
+
+
+export const getGetMyListedDealsQueryOptions = <TData = Awaited<ReturnType<typeof getMyListedDeals>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyListedDeals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyListedDealsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyListedDeals>>> = ({ signal }) => getMyListedDeals({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyListedDeals>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyListedDealsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyListedDeals>>>
+export type GetMyListedDealsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get my deals listed for transfer
+ */
+
+export function useGetMyListedDeals<TData = Awaited<ReturnType<typeof getMyListedDeals>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyListedDeals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyListedDealsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetTransferRequestsUrl = () => {
+
+
+
+
+  return `/api/transfers/requests`
+}
+
+/**
+ * @summary Get transfer requests for my deals
+ */
+export const getTransferRequests = async ( options?: RequestInit): Promise<TransferRequest[]> => {
+
+  return customFetch<TransferRequest[]>(getGetTransferRequestsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTransferRequestsQueryKey = () => {
+    return [
+    `/api/transfers/requests`
+    ] as const;
+    }
+
+
+export const getGetTransferRequestsQueryOptions = <TData = Awaited<ReturnType<typeof getTransferRequests>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTransferRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTransferRequestsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTransferRequests>>> = ({ signal }) => getTransferRequests({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTransferRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTransferRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof getTransferRequests>>>
+export type GetTransferRequestsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get transfer requests for my deals
+ */
+
+export function useGetTransferRequests<TData = Awaited<ReturnType<typeof getTransferRequests>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTransferRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTransferRequestsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListForTransferUrl = (id: number,) => {
+
+
+
+
+  return `/api/deals/${id}/list-for-transfer`
+}
+
+/**
+ * @summary List a deal for public transfer
+ */
+export const listForTransfer = async (id: number,
+    listForTransferBody: ListForTransferBody, options?: RequestInit): Promise<Deal> => {
+
+  return customFetch<Deal>(getListForTransferUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      listForTransferBody,)
+  }
+);}
+
+
+
+
+export const getListForTransferMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listForTransfer>>, TError,{id: number;data: BodyType<ListForTransferBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof listForTransfer>>, TError,{id: number;data: BodyType<ListForTransferBody>}, TContext> => {
+
+const mutationKey = ['listForTransfer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof listForTransfer>>, {id: number;data: BodyType<ListForTransferBody>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  listForTransfer(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ListForTransferMutationResult = NonNullable<Awaited<ReturnType<typeof listForTransfer>>>
+    export type ListForTransferMutationBody = BodyType<ListForTransferBody>
+    export type ListForTransferMutationError = ErrorType<unknown>
+
+    /**
+ * @summary List a deal for public transfer
+ */
+export const useListForTransfer = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listForTransfer>>, TError,{id: number;data: BodyType<ListForTransferBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof listForTransfer>>,
+        TError,
+        {id: number;data: BodyType<ListForTransferBody>},
+        TContext
+      > => {
+      return useMutation(getListForTransferMutationOptions(options));
+    }
+
+export const getUnlistForTransferUrl = (id: number,) => {
+
+
+
+
+  return `/api/deals/${id}/unlist`
+}
+
+/**
+ * @summary Remove deal from transfer marketplace
+ */
+export const unlistForTransfer = async (id: number, options?: RequestInit): Promise<Deal> => {
+
+  return customFetch<Deal>(getUnlistForTransferUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getUnlistForTransferMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlistForTransfer>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unlistForTransfer>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['unlistForTransfer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unlistForTransfer>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  unlistForTransfer(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnlistForTransferMutationResult = NonNullable<Awaited<ReturnType<typeof unlistForTransfer>>>
+
+    export type UnlistForTransferMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Remove deal from transfer marketplace
+ */
+export const useUnlistForTransfer = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlistForTransfer>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof unlistForTransfer>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getUnlistForTransferMutationOptions(options));
+    }
+
+export const getRequestTransferUrl = (id: number,) => {
+
+
+
+
+  return `/api/deals/${id}/request-transfer`
+}
+
+/**
+ * @summary Request to take over a listed deal
+ */
+export const requestTransfer = async (id: number,
+    transferRequestInput: TransferRequestInput, options?: RequestInit): Promise<TransferRequest> => {
+
+  return customFetch<TransferRequest>(getRequestTransferUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      transferRequestInput,)
+  }
+);}
+
+
+
+
+export const getRequestTransferMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestTransfer>>, TError,{id: number;data: BodyType<TransferRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestTransfer>>, TError,{id: number;data: BodyType<TransferRequestInput>}, TContext> => {
+
+const mutationKey = ['requestTransfer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestTransfer>>, {id: number;data: BodyType<TransferRequestInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  requestTransfer(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestTransferMutationResult = NonNullable<Awaited<ReturnType<typeof requestTransfer>>>
+    export type RequestTransferMutationBody = BodyType<TransferRequestInput>
+    export type RequestTransferMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Request to take over a listed deal
+ */
+export const useRequestTransfer = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestTransfer>>, TError,{id: number;data: BodyType<TransferRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestTransfer>>,
+        TError,
+        {id: number;data: BodyType<TransferRequestInput>},
+        TContext
+      > => {
+      return useMutation(getRequestTransferMutationOptions(options));
+    }
+
+export const getApproveTransferUrl = (id: number,) => {
+
+
+
+
+  return `/api/transfers/${id}/approve`
+}
+
+/**
+ * @summary Approve or reject a transfer request
+ */
+export const approveTransfer = async (id: number,
+    transferApprovalInput: TransferApprovalInput, options?: RequestInit): Promise<TransferRequest> => {
+
+  return customFetch<TransferRequest>(getApproveTransferUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      transferApprovalInput,)
+  }
+);}
+
+
+
+
+export const getApproveTransferMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveTransfer>>, TError,{id: number;data: BodyType<TransferApprovalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveTransfer>>, TError,{id: number;data: BodyType<TransferApprovalInput>}, TContext> => {
+
+const mutationKey = ['approveTransfer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveTransfer>>, {id: number;data: BodyType<TransferApprovalInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  approveTransfer(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApproveTransferMutationResult = NonNullable<Awaited<ReturnType<typeof approveTransfer>>>
+    export type ApproveTransferMutationBody = BodyType<TransferApprovalInput>
+    export type ApproveTransferMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Approve or reject a transfer request
+ */
+export const useApproveTransfer = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveTransfer>>, TError,{id: number;data: BodyType<TransferApprovalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof approveTransfer>>,
+        TError,
+        {id: number;data: BodyType<TransferApprovalInput>},
+        TContext
+      > => {
+      return useMutation(getApproveTransferMutationOptions(options));
+    }
 
 export const getGetRecentActivityUrl = () => {
 

@@ -376,6 +376,151 @@ paths:
               schema:
                 $ref: "#/components/schemas/DashboardSummary"
 
+  /transfers/marketplace:
+    get:
+      operationId: listMarketplaceDeals
+      tags: [transfers]
+      summary: Browse deals available for transfer
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [real_estate, vehicle, business, other]
+      responses:
+        "200":
+          description: List of transferable deals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransferableDeal"
+
+  /transfers/my-listings:
+    get:
+      operationId: getMyListedDeals
+      tags: [transfers]
+      summary: Get my deals listed for transfer
+      responses:
+        "200":
+          description: My listed deals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransferableDeal"
+
+  /transfers/requests:
+    get:
+      operationId: getTransferRequests
+      tags: [transfers]
+      summary: Get transfer requests for my deals
+      responses:
+        "200":
+          description: Transfer requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransferRequest"
+
+  /deals/{id}/list-for-transfer:
+    post:
+      operationId: listForTransfer
+      tags: [transfers]
+      summary: List a deal for public transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListForTransferBody"
+      responses:
+        "200":
+          description: Deal listed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/{id}/unlist:
+    post:
+      operationId: unlistForTransfer
+      tags: [transfers]
+      summary: Remove deal from transfer marketplace
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deal unlisted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/{id}/request-transfer:
+    post:
+      operationId: requestTransfer
+      tags: [transfers]
+      summary: Request to take over a listed deal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferRequestInput"
+      responses:
+        "201":
+          description: Transfer request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransferRequest"
+
+  /transfers/{id}/approve:
+    post:
+      operationId: approveTransfer
+      tags: [transfers]
+      summary: Approve or reject a transfer request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferApprovalInput"
+      responses:
+        "200":
+          description: Transfer updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransferRequest"
+
   /dashboard/activity:
     get:
       operationId: getRecentActivity
@@ -468,6 +613,13 @@ components:
           type: boolean
         sellerSigned:
           type: boolean
+        transferStatus:
+          type: string
+          enum: [not_listed, listed, transferred]
+        transferPrice:
+          type: ["number", "null"]
+        transferDescription:
+          type: ["string", "null"]
         createdAt:
           type: string
         updatedAt:
@@ -568,6 +720,14 @@ components:
         createdAt:
           type: string
 
+    ListForTransferBody:
+      type: object
+      properties:
+        price:
+          type: number
+        description:
+          type: string
+
     DisputeInput:
       type: object
       required: [reason]
@@ -658,3 +818,74 @@ components:
           type: integer
         dealsAsSeller:
           type: integer
+    TransferRequest:
+      type: object
+      required: [id, dealId, fromUserId, toUserId, fromUserName, toUserName, price, status, createdAt]
+      properties:
+        id:
+          type: integer
+        dealId:
+          type: integer
+        fromUserId:
+          type: integer
+        toUserId:
+          type: integer
+        fromUserName:
+          type: string
+        toUserName:
+          type: string
+        price:
+          type: number
+        message:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        createdAt:
+          type: string
+    TransferRequestInput:
+      type: object
+      required: [dealId, price]
+      properties:
+        dealId:
+          type: integer
+        price:
+          type: number
+          minimum: 0
+        message:
+          type: string
+    TransferApprovalInput:
+      type: object
+      required: [approved]
+      properties:
+        approved:
+          type: boolean
+    TransferableDeal:
+      type: object
+      required: [id, title, type, amount, transferPrice, buyerName, sellerName, deadline, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+          enum: [real_estate, vehicle, business, other]
+        amount:
+          type: number
+        transferPrice:
+          type: number
+        description:
+          type: ["string", "null"]
+        propertyAddress:
+          type: ["string", "null"]
+        vehicleInfo:
+          type: ["string", "null"]
+        buyerName:
+          type: string
+        sellerName:
+          type: string
+        deadline:
+          type: string
+        createdAt:
+          type: string

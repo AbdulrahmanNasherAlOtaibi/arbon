@@ -5,6 +5,7 @@ import { usersTable } from "./users";
 
 export const dealTypeEnum = pgEnum("deal_type", ["real_estate", "vehicle", "business", "other"]);
 export const dealStatusEnum = pgEnum("deal_status", ["pending", "active", "completed", "cancelled", "disputed", "refunded", "forfeited"]);
+export const transferStatusEnum = pgEnum("transfer_status", ["not_listed", "listed", "transferred"]);
 
 export const dealsTable = pgTable("deals", {
   id: serial("id").primaryKey(),
@@ -24,6 +25,12 @@ export const dealsTable = pgTable("deals", {
   sellerSigned: boolean("seller_signed").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  // Transfer fields
+  transferStatus: transferStatusEnum("transfer_status").notNull().default("not_listed"),
+  transferPrice: numeric("transfer_price", { precision: 12, scale: 2 }),
+  transferDescription: text("transfer_description"),
+  transferredToId: integer("transferred_to_id").references(() => usersTable.id),
+  transferredAt: timestamp("transferred_at"),
 });
 
 export const insertDealSchema = createInsertSchema(dealsTable).omit({ id: true, createdAt: true, updatedAt: true });
