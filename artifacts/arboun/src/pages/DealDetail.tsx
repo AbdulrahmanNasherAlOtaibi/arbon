@@ -405,6 +405,21 @@ export default function DealDetail({ id }: Props) {
                   <p className="text-sm text-muted-foreground">
                     اكتب سعر التنازل والوصف، ثم أكّد لعرض الصفقة في سوق التنازلات. المشترون الجدد يمكنهم طلب التنازل منك.
                   </p>
+                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                    <p className="text-xs font-semibold text-slate-700">تفاصيل العربون الحالية</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-600">مبلغ العربون المحجوز</span>
+                      <span className="text-sm font-bold text-slate-800">{formatAmount(deal.amount)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-600">رسوم المنصة (٢٪)</span>
+                      <span className="text-sm font-medium text-slate-700">{formatAmount(deal.platformFee ?? 0)}</span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-slate-200 pt-2">
+                      <span className="text-xs font-semibold text-slate-700">العربون الصافي</span>
+                      <span className="text-sm font-bold text-slate-800">{formatAmount((deal.amount ?? 0) - (deal.platformFee ?? 0))}</span>
+                    </div>
+                  </div>
                   <div>
                     <label className="text-xs font-medium mb-1 block">سعر التنازل (ريال)</label>
                     <input

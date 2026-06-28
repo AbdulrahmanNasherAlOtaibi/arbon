@@ -188,6 +188,7 @@ router.get("/deals/:id", async (req, res): Promise<void> => {
     ...deal,
     amount: Number(deal.amount),
     platformFee: Number(deal.platformFee),
+    transferPrice: deal.transferPrice ? Number(deal.transferPrice) : null,
     createdAt: deal.createdAt.toISOString(),
     updatedAt: deal.updatedAt.toISOString(),
   }));
