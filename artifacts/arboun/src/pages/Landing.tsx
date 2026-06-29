@@ -1,137 +1,126 @@
-import HeroImage from "@/components/HeroImage";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { useGetMe } from "@workspace/api-client-react";
-import { Shield, ArrowLeft, Handshake, Store, FileText } from "lucide-react";
+import { useState } from "react";
+import { useLocation } from "wouter";
+
+function ShieldLogo({ size = 72 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+      <defs>
+        <linearGradient id="login-lg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#F2F3F4" />
+          <stop offset="48%" stopColor="#9DA2AA" />
+          <stop offset="100%" stopColor="#CBCFD4" />
+        </linearGradient>
+      </defs>
+      <path d="M50 4 L90 26 V62 C90 79 72 91 50 96 C28 91 10 79 10 62 V26 Z" fill="url(#login-lg)" />
+      <circle cx="50" cy="21" r="5.5" fill="#1A1B1E" opacity="0.55" />
+      <rect x="41" y="45" width="18" height="18" rx="2" fill="#1A1B1E" opacity="0.55" transform="rotate(45 50 54)" />
+    </svg>
+  );
+}
 
 export default function Landing() {
-  const { data: user } = useGetMe();
+  const [, navigate] = useLocation();
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    background: "#2B2D31",
+    border: "1px solid rgba(255,255,255,0.07)",
+    borderRadius: 14,
+    padding: "15px 16px",
+    color: "#E6E7E9",
+    fontSize: 14,
+    fontFamily: "'Cairo', sans-serif",
+    fontWeight: 600,
+    outline: "none",
+  };
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      {/* Navbar */}
-      <nav className="h-16 border-b border-border bg-background flex items-center justify-between px-8">
-        <div className="flex items-center gap-2 font-bold text-xl">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-            ع
+    <div
+      dir="rtl"
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        background: `
+          radial-gradient(1200px 600px at 80% -10%, rgba(80,84,92,0.25), transparent 60%),
+          radial-gradient(900px 500px at 10% 110%, rgba(60,63,68,0.3), transparent 55%),
+          #0C0D0F
+        `,
+      }}
+    >
+      <div className="w-full max-w-sm px-6">
+        {/* Brand */}
+        <div className="text-center mb-10">
+          <div className="flex justify-center mb-4">
+            <ShieldLogo size={72} />
           </div>
-          عربون
+          <h1 className="text-3xl font-extrabold mb-2" style={{ color: "#E6E7E9" }}>عربون</h1>
+          <p className="text-sm font-semibold" style={{ color: "#8A8F98" }}>ثقتك محفوظة</p>
         </div>
-        <div className="flex items-center gap-4">
-          {user ? (
-            <Link href="/dashboard">
-              <Button variant="ghost" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                الدخول للتطبيق
-              </Button>
-            </Link>
-          ) : (
-            <Link href="/dashboard">
-              <Button variant="ghost" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                تسجيل الدخول
-              </Button>
-            </Link>
-          )}
-        </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold mb-4">
-              إدار مبلغ العربون الرقمي
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              احمي صفقتك بشكل آمن. عربون يؤمن إيداع العربون في الصفقات العقارية والمركبات والأعمال من خلال الخانوق الرقمية المبرمجة.
-            </p>
-            <div className="flex items-center justify-center gap-4 mt-6">
-              <Link href="/deals/new">
-                <Button size="lg" className="gap-2">
-                  <Shield className="w-5 h-5" />
-                  إنشاء صفقة جديدة
-                </Button>
-              </Link>
-              <Link href="/transfers/marketplace">
-                <Button size="lg" variant="outline" className="gap-2">
-                  <Store className="w-5 h-5" />
-                  سوق التنازلات
-                </Button>
-              </Link>
-            </div>
+        {/* Form */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>رقم الجوال</label>
+            <input
+              type="tel"
+              placeholder="05XXXXXXXX"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              style={inputStyle}
+            />
           </div>
-
-          <HeroImage />
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-16 px-4 bg-secondary/30">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-10">كيف يعمل عربون؟</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl bg-background border border-border">
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <Handshake className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">إنشاء الصفقة</h3>
-              <p className="text-sm text-muted-foreground">
-                اختر نموذجاً جاهزاً أو أنشئ صفقة مخصصة للعقار أو المركبة أو الأعمال.
-              </p>
-            </div>
-            <div className="p-6 rounded-xl bg-background border border-border">
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">حجز العربون</h3>
-              <p className="text-sm text-muted-foreground">
-                ادفع العربون في الخانوق الرقمية وامضي عليه حتى انتهاء الصفقة أو التنازل.
-              </p>
-            </div>
-            <div className="p-6 rounded-xl bg-background border border-border">
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">العقد الرقمي</h3>
-              <p className="text-sm text-muted-foreground">
-                وقّع البائع والمشتري على العقد الرقمي المخصص إلكترونيّاً مع وصف الشروط والالتزامات.
-              </p>
-            </div>
+          <div>
+            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>كلمة المرور</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={inputStyle}
+            />
           </div>
         </div>
-      </section>
 
-      {/* CTA */}
-      <section className="py-16 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-4">ابدأ بحماية صفقاتك اليوم</h2>
-          <p className="text-muted-foreground mb-6">
-            انضم لأكثر من 10,000 مستخدم يوثقون بعربون في صفقاتهم الرقمية.
-          </p>
-          <Link href="/dashboard">
-            <Button size="lg" className="gap-2">
-              <ArrowLeft className="w-5 h-5" />
-              الدخول إلى التطبيق
-            </Button>
-          </Link>
-        </div>
-      </section>
+        {/* Login button */}
+        <button
+          className="w-full py-4 rounded-[15px] text-sm font-extrabold mt-5 transition-transform active:scale-[0.98]"
+          style={{ background: "linear-gradient(135deg, #F2F3F4, #C4C8CE)", color: "#1A1B1E" }}
+          onClick={() => navigate("/dashboard")}
+        >
+          تسجيل الدخول
+        </button>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-lg">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-              ع
-            </div>
-            عربون
-          </div>
-          <p className="text-sm text-muted-foreground">
-            © 2026 عربون — إدار مبلغ العربون الرقمي
-          </p>
+        <div className="text-center mt-4">
+          <span className="text-[12.5px] font-semibold" style={{ color: "#8A8F98" }}>
+            نسيت كلمة المرور؟
+          </span>
         </div>
-      </footer>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-5">
+          <div className="flex-1 h-px" style={{ background: "#3C3F44" }} />
+          <span className="text-[11px]" style={{ color: "#6B7178" }}>أو</span>
+          <div className="flex-1 h-px" style={{ background: "#3C3F44" }} />
+        </div>
+
+        {/* National ID */}
+        <button
+          className="w-full py-4 rounded-[15px] text-sm font-extrabold transition-transform active:scale-[0.98]"
+          style={{ background: "transparent", border: "1px solid #45484E", color: "#A8ADB5" }}
+          onClick={() => navigate("/dashboard")}
+        >
+          الدخول عبر نفاذ الوطني
+        </button>
+
+        <p className="text-center text-[13px] mt-6" style={{ color: "#8A8F98" }}>
+          ليس لديك حساب؟{" "}
+          <span className="font-bold cursor-pointer" style={{ color: "#E6E7E9" }}
+            onClick={() => navigate("/dashboard")}>
+            إنشاء حساب جديد
+          </span>
+        </p>
+      </div>
     </div>
   );
 }

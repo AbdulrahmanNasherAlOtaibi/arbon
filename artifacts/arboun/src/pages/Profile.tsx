@@ -1,144 +1,118 @@
+import { useLocation } from "wouter";
 import { useGetMe, useGetDashboardSummary } from "@workspace/api-client-react";
-import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Layout, InkCard } from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatAmount, formatDate } from "@/lib/helpers";
-import { User, Phone, Mail, Shield, CheckCircle, Clock, Briefcase, TrendingUp } from "lucide-react";
+import { formatAmount } from "@/lib/helpers";
 
 export default function Profile() {
+  const [, navigate] = useLocation();
   const { data: user, isLoading: userLoading } = useGetMe();
-  const { data: summary, isLoading: summaryLoading } = useGetDashboardSummary();
+  const { data: summary } = useGetDashboardSummary();
+
+  const menuItems = [
+    { icon: "🪪", label: "التحقق من الهوية", sub: "موثقة عبر نفاذ الوطني" },
+    { icon: "💳", label: "وسائل الدفع", sub: "بطاقتان محفوظتان" },
+    { icon: "📜", label: "سجل العمليات", sub: `${summary?.totalDeals ?? 0} عملية موثقة` },
+    { icon: "🔔", label: "إعدادات الإشعارات", sub: "" },
+    { icon: "🛟", label: "الدعم والمساعدة", sub: "" },
+  ];
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold">الملف الشخصي</h2>
-          <p className="text-muted-foreground mt-1">معلوماتك الشخصية وإحصائيات حسابك</p>
+      <div className="px-5 py-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-extrabold" style={{ color: "#E6E7E9" }}>الملف الشخصي</h2>
+          <button
+            className="w-10 h-10 rounded-[13px] flex items-center justify-center text-lg"
+            style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)" }}
+          >
+            ⚙️
+          </button>
         </div>
 
-        {/* Profile Card */}
+        {/* Avatar + Name */}
         {userLoading ? (
-          <Skeleton className="h-40 rounded-xl" />
+          <div className="flex flex-col items-center py-8 gap-3">
+            <Skeleton className="w-20 h-20 rounded-full" />
+            <Skeleton className="h-5 w-36" />
+          </div>
         ) : user ? (
-          <Card className="border shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-5">
-                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-3xl font-bold shrink-0">
-                  {user.name.charAt(0)}
-                </div>
-                <div className="flex-1 space-y-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-bold">{user.name}</h3>
-                      {user.verified ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-800 border border-emerald-200">
-                          <CheckCircle className="w-3 h-3" />
-                          موثق
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 border border-amber-200">
-                          <Clock className="w-3 h-3" />
-                          قيد التوثيق
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-0.5">رقم الهوية: {user.nationalId}</p>
-                  </div>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <span dir="ltr">{user.phone}</span>
-                    </div>
-                    {user.email && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        <span dir="ltr">{user.email}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <span>عضو منذ {formatDate(user.createdAt)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center pb-6">
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-extrabold mb-3"
+              style={{
+                background: "linear-gradient(140deg, #4E5258, #33363B)",
+                border: "2px solid rgba(255,255,255,0.1)",
+                color: "#E6E7E9",
+              }}
+            >
+              {user.name.charAt(0)}
+            </div>
+            <p className="text-lg font-extrabold" style={{ color: "#E6E7E9" }}>{user.name}</p>
+            <span
+              className="inline-flex items-center gap-1.5 mt-2 text-[11.5px] font-bold px-3 py-1.5 rounded-full"
+              style={{ background: "rgba(91,174,126,0.14)", color: "#5BAE7E" }}
+            >
+              ✓ هوية موثقة
+            </span>
+          </div>
         ) : null}
-
-        {/* Identity Verification */}
-        <Card className="border border-primary/20 bg-primary/5 shadow-sm">
-          <CardContent className="p-5 flex items-start gap-4">
-            <div className="p-3 rounded-xl bg-primary/10 shrink-0">
-              <Shield className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <p className="font-semibold">حماية هويتك</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                جميع الأطراف في منصة عربون موثقون بهوياتهم الوطنية وفق اشتراطات ساما. يضمن ذلك حقوقك القانونية ويحمل كل طرف مسؤوليته كاملاً.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Stats */}
-        {summaryLoading ? (
-          <Skeleton className="h-40 rounded-xl" />
-        ) : summary ? (
-          <Card className="border shadow-sm">
-            <CardHeader className="pb-3"><CardTitle className="text-base">إحصائيات حسابي</CardTitle></CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-secondary/50 text-center">
-                  <Briefcase className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
-                  <p className="text-2xl font-bold">{summary.totalDeals}</p>
-                  <p className="text-xs text-muted-foreground">إجمالي الصفقات</p>
-                </div>
-                <div className="p-4 rounded-xl bg-secondary/50 text-center">
-                  <CheckCircle className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-emerald-700">{summary.completedDeals}</p>
-                  <p className="text-xs text-muted-foreground">صفقات مكتملة</p>
-                </div>
-                <div className="p-4 rounded-xl bg-secondary/50 text-center">
-                  <TrendingUp className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
-                  <p className="text-xl font-bold">{formatAmount(summary.totalAmountCompleted)}</p>
-                  <p className="text-xs text-muted-foreground">إجمالي المبالغ المكتملة</p>
-                </div>
-                <div className="p-4 rounded-xl bg-secondary/50 text-center">
-                  <Shield className="w-5 h-5 text-primary mx-auto mb-1" />
-                  <p className="text-xl font-bold">{formatAmount(summary.totalAmountEscrowed)}</p>
-                  <p className="text-xs text-muted-foreground">مبالغ في حساب الضمان</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ) : null}
+        {summary && (
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <InkCard className="text-center py-4">
+              <p className="text-xl font-extrabold text-white">{summary.totalDeals}</p>
+              <p className="text-[11px] mt-1" style={{ color: "#8A8F98" }}>إجمالي الصفقات</p>
+            </InkCard>
+            <InkCard className="text-center py-4">
+              <p className="text-xl font-extrabold text-white">{formatAmount(summary.totalAmountEscrowed)}</p>
+              <p className="text-[11px] mt-1" style={{ color: "#8A8F98" }}>محجوز حالياً</p>
+            </InkCard>
+          </div>
+        )}
 
-        {/* Platform Trust */}
-        <Card className="border shadow-sm">
-          <CardHeader className="pb-3"><CardTitle className="text-base">لماذا عربون؟</CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                { icon: Shield,       title: "حساب ضمان مرخص من ساما",    desc: "مبلغك محفوظ لدى مزود مدفوعات مرخص تحت إشراف ساما" },
-                { icon: CheckCircle,  title: "عقود رقمية ملزمة",           desc: "عقودنا موثقة ومعتمدة بتوقيع رقمي قانوني" },
-                { icon: Clock,        title: "فض نزاعات خلال 48 ساعة",     desc: "لجنة محايدة تبت في النزاعات سريعاً وبعدالة" },
-              ].map((item) => (
-                <div key={item.title} className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/8 shrink-0">
-                    <item.icon className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Menu */}
+        <div className="space-y-2 mb-4">
+          {menuItems.map((item) => (
+            <button
+              key={item.label}
+              className="w-full flex items-center gap-3 rounded-[15px] p-4 text-right"
+              style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.04)" }}
+            >
+              <div
+                className="w-9 h-9 rounded-[11px] flex items-center justify-center text-base flex-shrink-0"
+                style={{ background: "#3C3F44" }}
+              >
+                {item.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13.5px] font-bold" style={{ color: "#C4C8CE" }}>{item.label}</p>
+                {item.sub && (
+                  <p className="text-[11px] mt-0.5" style={{ color: "#6B7178" }}>{item.sub}</p>
+                )}
+              </div>
+              <span className="text-lg" style={{ color: "#6B7178" }}>‹</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Logout */}
+        <button
+          className="w-full flex items-center gap-3 rounded-[15px] p-4 text-right mt-2"
+          style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.04)" }}
+          onClick={() => navigate("/")}
+        >
+          <div
+            className="w-9 h-9 rounded-[11px] flex items-center justify-center text-base flex-shrink-0"
+            style={{ background: "rgba(203,96,96,0.14)" }}
+          >
+            🚪
+          </div>
+          <p className="text-[13.5px] font-bold" style={{ color: "#CB6060" }}>تسجيل الخروج</p>
+        </button>
+
+        <div className="h-4" />
       </div>
     </Layout>
   );

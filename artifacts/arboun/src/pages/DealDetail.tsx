@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useGetDeal,
@@ -16,24 +16,38 @@ import {
   getGetDashboardSummaryQueryKey,
   getGetRecentActivityQueryKey,
 } from "@workspace/api-client-react";
-import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  Layout,
+  PageHeader,
+  InkCard,
+  Pill,
+  PrimaryBtn,
+  SecondaryBtn,
+  DangerBtn,
+  InfoRow,
+  statusToPillVariant,
+} from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { formatAmount, formatDate, formatDateTime, statusLabel, statusColor, typeLabel, disputeStatusLabel } from "@/lib/helpers";
-import {
-  Shield, CheckCircle, XCircle, AlertCircle, Clock, FileText,
-  User, ChevronLeft, Calendar, DollarSign, Building2, Tag
-} from "lucide-react";
+import { formatAmount, formatDate, formatDateTime, statusLabel, typeIcon } from "@/lib/helpers";
 
-interface Props {
-  id: number;
-}
-
+interface Props { id: number; }
 type ActionType = "complete" | "cancel" | "forfeit" | "list" | null;
+
+const stepLabels = ["محجوز", "تم الدفع", "تم التأكيد", "مكتملة"];
+
+function statusToStep(status: string): number {
+  const map: Record<string, number> = {
+    pending: 1,
+    active: 2,
+    completed: 4,
+    cancelled: 1,
+    disputed: 2,
+    forfeited: 1,
+  };
+  return map[status] ?? 1;
+}
 
 export default function DealDetail({ id }: Props) {
   const [, navigate] = useLocation();
@@ -56,6 +70,7 @@ export default function DealDetail({ id }: Props) {
   const [actionLoading, setActionLoading] = useState(false);
   const [listPrice, setListPrice] = useState("");
   const [listDesc, setListDesc] = useState("");
+  const [showContract, setShowContract] = useState(false);
 
   async function invalidate() {
     await Promise.all([
@@ -91,8 +106,7 @@ export default function DealDetail({ id }: Props) {
       }
       return;
     }
-
-    if (!reason.trim()) return;
+    if (!reason.trim() && activeAction !== "complete") return;
     setActionLoading(true);
     try {
       if (activeAction === "complete") {
@@ -113,10 +127,11 @@ export default function DealDetail({ id }: Props) {
   if (isLoading) {
     return (
       <Layout>
-        <div className="space-y-4 max-w-3xl mx-auto">
-          <Skeleton className="h-10 w-48 rounded-lg" />
-          <Skeleton className="h-48 rounded-xl" />
-          <Skeleton className="h-64 rounded-xl" />
+        <PageHeader title="تفاصيل الصفقة" onBack={() => navigate("/deals")} />
+        <div className="px-5 space-y-3">
+          <Skeleton className="h-32 rounded-[18px]" />
+          <Skeleton className="h-48 rounded-[18px]" />
+          <Skeleton className="h-48 rounded-[18px]" />
         </div>
       </Layout>
     );
@@ -125,9 +140,12 @@ export default function DealDetail({ id }: Props) {
   if (!deal) {
     return (
       <Layout>
-        <div className="max-w-3xl mx-auto text-center py-16">
-          <p className="text-xl font-semibold">الصفقة غير موجودة</p>
-          <Link href="/deals"><Button variant="outline" className="mt-4">العودة للصفقات</Button></Link>
+        <PageHeader title="تفاصيل الصفقة" onBack={() => navigate("/deals")} />
+        <div className="px-5 text-center py-16">
+          <p className="font-semibold" style={{ color: "#8A8F98" }}>الصفقة غير موجودة</p>
+          <button className="mt-4 text-sm font-bold" style={{ color: "#E6E7E9" }} onClick={() => navigate("/deals")}>
+            العودة للصفقات
+          </button>
         </div>
       </Layout>
     );
@@ -139,342 +157,308 @@ export default function DealDetail({ id }: Props) {
   const isPending = deal.status === "pending";
   const canSign = (isBuyer && !deal.buyerSigned) || (isSeller && !deal.sellerSigned);
   const canAct = (isActive || isPending) && (isBuyer || isSeller);
+  const currentStep = statusToStep(deal.status);
 
   const actionLabels: Record<string, string> = {
     complete: "تأكيد إتمام الصفقة",
-    cancel: "إلغاء الصفقة وإسترجاع العربون",
-    forfeit: "الانسحاب ومصادرة العربون للبائع",
-    list: "عرض الصفقة في سوق التنازلات",
-  };
-
-  const actionColors: Record<string, string> = {
-    complete: "bg-emerald-600 hover:bg-emerald-700 text-white",
-    cancel:   "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
-    forfeit:  "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
-    list:     "bg-primary hover:bg-primary/90 text-primary-foreground",
-  };
-
-  const timelineIcons: Record<string, string> = {
-    created:       "✦",
-    buyer_signed:  "✎",
-    seller_signed: "✎",
-    completed:     "✓",
-    cancelled:     "✗",
-    disputed:      "!",
-    forfeited:     "✗",
-    dispute_opened:"!",
+    cancel: "إلغاء الصفقة",
+    forfeit: "الانسحاب ومصادرة العربون",
+    list: "عرض الصفقة للتنازل",
   };
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Back + Header */}
-        <div>
-          <Link href="/deals" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 group">
-            <ChevronLeft className="w-4 h-4 rotate-180 group-hover:-translate-x-0.5 transition-transform" />
-            الصفقات
-          </Link>
-          <div className="flex items-start gap-3 flex-wrap">
-            <div className="text-3xl">
-              {deal.type === "real_estate" ? "🏠" : deal.type === "vehicle" ? "🚗" : deal.type === "business" ? "🏢" : "📄"}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-2xl font-bold">{deal.title}</h2>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusColor[deal.status] ?? ""}`}>
-                  {statusLabel[deal.status] ?? deal.status}
-                </span>
-              </div>
-              <p className="text-muted-foreground text-sm mt-1">{typeLabel[deal.type] ?? deal.type}</p>
-            </div>
+      <PageHeader
+        title="تفاصيل الصفقة"
+        onBack={() => navigate("/deals")}
+        right={
+          <button
+            className="w-10 h-10 rounded-[13px] flex items-center justify-center text-lg"
+            style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)", color: "#A8ADB5" }}
+          >
+            ⋯
+          </button>
+        }
+      />
+
+      <div className="px-5 pb-8 space-y-4">
+        {/* Hero */}
+        <div className="text-center py-4">
+          <div
+            className="w-16 h-16 rounded-[18px] flex items-center justify-center text-3xl mx-auto mb-3"
+            style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            {typeIcon[deal.type] ?? "📄"}
           </div>
+          <p className="text-3xl font-extrabold" style={{ color: "#fff" }}>
+            {Number(deal.amount ?? 0).toLocaleString("ar-SA")}
+            <span className="text-lg font-semibold mr-1" style={{ color: "#8A8F98" }}> ر.س</span>
+          </p>
+          <p className="text-[13px] mt-1.5" style={{ color: "#8A8F98" }}>{deal.title}</p>
         </div>
 
-        {/* Amount Card */}
-        <Card className="border bg-primary/5 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-primary/10">
-                  <Shield className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">مبلغ العربون المحجوز</p>
-                  <p className="text-3xl font-bold text-primary">{formatAmount(deal.amount)}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">رسوم المنصة (٢٪): {formatAmount(deal.platformFee ?? 0)} · العملة: {deal.currency}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground">الموعد النهائي</p>
-                <p className="font-semibold flex items-center gap-1 mt-0.5">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  {formatDate(deal.deadline)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Parties */}
-        <Card className="border shadow-sm">
-          <CardHeader className="pb-3"><CardTitle className="text-base">أطراف الصفقة</CardTitle></CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-secondary/50 border">
-                <div className="flex items-center gap-2 mb-2">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground font-medium">المشتري</p>
-                </div>
-                <p className="font-semibold">{deal.buyerName}</p>
-                <div className="flex items-center gap-1.5 mt-2">
-                  {deal.buyerSigned
-                    ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-600" /><span className="text-xs text-emerald-700">وقّع على العقد</span></>
-                    : <><Clock className="w-3.5 h-3.5 text-amber-500" /><span className="text-xs text-amber-700">لم يوقع بعد</span></>
+        {/* Stepper */}
+        <div className="flex relative">
+          {stepLabels.map((label, i) => {
+            const step = i + 1;
+            const isDone = step < currentStep;
+            const isCur = step === currentStep;
+            return (
+              <div key={label} className="flex-1 flex flex-col items-center relative">
+                {/* connector line */}
+                {i > 0 && (
+                  <div
+                    className="absolute top-[15px] right-1/2 w-full h-0.5"
+                    style={{ background: step <= currentStep ? "#C4C8CE" : "#45484E", zIndex: 1 }}
+                  />
+                )}
+                {/* circle */}
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold relative z-10 mb-2"
+                  style={
+                    isDone
+                      ? { background: "#E6E7E9", color: "#1A1B1E", border: "2px solid #1A1B1E" }
+                      : isCur
+                      ? { background: "#1A1B1E", color: "#E6E7E9", border: "2px solid #E6E7E9" }
+                      : { background: "#3C3F44", color: "#8A8F98", border: "2px solid #1A1B1E" }
                   }
+                >
+                  {isDone ? "✓" : step}
                 </div>
+                <span
+                  className="text-[9.5px] font-semibold text-center"
+                  style={{ color: isDone || isCur ? "#C4C8CE" : "#8A8F98" }}
+                >
+                  {label}
+                </span>
               </div>
-              <div className="p-4 rounded-xl bg-secondary/50 border">
-                <div className="flex items-center gap-2 mb-2">
-                  <Building2 className="w-4 h-4 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground font-medium">البائع</p>
-                </div>
-                <p className="font-semibold">{deal.sellerName}</p>
-                <div className="flex items-center gap-1.5 mt-2">
-                  {deal.sellerSigned
-                    ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-600" /><span className="text-xs text-emerald-700">وقّع على العقد</span></>
-                    : <><Clock className="w-3.5 h-3.5 text-amber-500" /><span className="text-xs text-amber-700">لم يوقع بعد</span></>
-                  }
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            );
+          })}
+        </div>
 
-        {/* Description */}
-        <Card className="border shadow-sm">
-          <CardHeader className="pb-3"><CardTitle className="text-base">تفاصيل الصفقة</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-foreground leading-relaxed">{deal.description}</p>
-            {deal.propertyAddress && (
-              <div className="p-3 rounded-lg bg-secondary/50 text-sm">
-                <span className="text-muted-foreground">العنوان: </span>{deal.propertyAddress}
-              </div>
-            )}
-            {deal.vehicleInfo && (
-              <div className="p-3 rounded-lg bg-secondary/50 text-sm">
-                <span className="text-muted-foreground">المركبة: </span>{deal.vehicleInfo}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Status pill */}
+        <div className="text-center">
+          <Pill variant={statusToPillVariant(deal.status)}>
+            {statusLabel[deal.status] ?? deal.status}
+          </Pill>
+        </div>
+
+        {/* Info boxes */}
+        <InkCard className="py-0 px-0 overflow-hidden">
+          <div className="px-4 last-of-type:border-b-0">
+            <InfoRow label="رقم الصفقة" value={`#AR-${deal.id}`} />
+            <InfoRow label="المشتري" value={deal.buyerName ?? "-"} />
+            <InfoRow label="البائع" value={deal.sellerName ?? "-"} />
+            <InfoRow label="تاريخ الإنشاء" value={formatDate(deal.createdAt ?? new Date().toISOString())} />
+            <InfoRow label="الموعد النهائي" value={formatDate(deal.deadline)} />
+          </div>
+        </InkCard>
+
+        <InkCard className="py-0 px-0 overflow-hidden">
+          <div className="px-4">
+            <InfoRow label="قيمة العربون" value={formatAmount(deal.amount)} />
+            <InfoRow label="رسوم المنصة (٢٪)" value={formatAmount(deal.platformFee ?? 0)} />
+            <div className="flex justify-between items-center py-3 text-sm">
+              <span style={{ color: "#8A8F98" }}>صافي المبلغ للبائع</span>
+              <span className="font-extrabold" style={{ color: "#E6E7E9" }}>
+                {formatAmount((deal.amount ?? 0) - (deal.platformFee ?? 0))}
+              </span>
+            </div>
+          </div>
+        </InkCard>
+
+        {/* Sign contract */}
+        {canSign && (
+          <PrimaryBtn onClick={handleSign} disabled={signContract.isPending}>
+            {signContract.isPending ? "جاري التوقيع..." : "✎ توقيع على العقد"}
+          </PrimaryBtn>
+        )}
 
         {/* Contract */}
         {contract && (
-          <Card className="border shadow-sm">
-            <CardHeader className="pb-3 flex flex-row items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                العقد الرقمي
-              </CardTitle>
-              {canSign && (
-                <Button size="sm" onClick={handleSign} disabled={signContract.isPending} className="gap-1.5">
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  {signContract.isPending ? "جاري التوقيع..." : "وقّع على العقد"}
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">الشروط العامة</p>
-                <p className="text-sm leading-relaxed bg-secondary/30 rounded-lg p-3">{contract.terms}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                  <p className="text-xs font-semibold text-emerald-800 mb-1">شروط الاسترجاع</p>
-                  <p className="text-xs text-emerald-700 leading-relaxed">{contract.refundConditions}</p>
+          <>
+            <PrimaryBtn onClick={() => setShowContract(true)}>عرض العقد الرقمي</PrimaryBtn>
+
+            {/* Contract sheet */}
+            {showContract && (
+              <div className="fixed inset-0 z-50 flex items-end" style={{ background: "rgba(0,0,0,0.7)" }}>
+                <div
+                  className="w-full rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto scrollbar-none"
+                  style={{ background: "#212327", border: "1px solid rgba(255,255,255,0.07)" }}
+                >
+                  <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: "#45484E" }} />
+                  <div className="text-center mb-5">
+                    <p className="text-sm font-bold" style={{ color: "#E6E7E9" }}>عقد عربون موثق</p>
+                    <p className="text-[11px] mt-1" style={{ color: "#6B7178" }}>#AR-{deal.id} · موثّق إلكترونياً</p>
+                  </div>
+                  <InkCard className="mb-4">
+                    <InfoRow label="البائع" value={deal.sellerName ?? "-"} />
+                    <InfoRow label="المشتري" value={deal.buyerName ?? "-"} />
+                    <InfoRow label="العربون" value={formatAmount(deal.amount)} />
+                  </InkCard>
+                  <InkCard className="mb-4">
+                    <p className="text-[13px] font-bold mb-2" style={{ color: "#C4C8CE" }}>شروط الاسترجاع والمصادرة</p>
+                    <p className="text-[12px] leading-relaxed" style={{ color: "#8A8F98" }}>
+                      {contract.refundConditions}
+                    </p>
+                    <div className="h-px my-3" style={{ background: "#33363B" }} />
+                    <p className="text-[12px] leading-relaxed" style={{ color: "#8A8F98" }}>
+                      {contract.forfeitureConditions}
+                    </p>
+                  </InkCard>
+                  <div
+                    className="flex items-center justify-center gap-2 text-[11.5px] font-bold mb-5"
+                    style={{ color: "#5BAE7E" }}
+                  >
+                    🔏 موثّق بطابع زمني · مقبول في المحاكم
+                  </div>
+                  <SecondaryBtn onClick={() => setShowContract(false)}>العودة للصفقة</SecondaryBtn>
                 </div>
-                <div className="p-3 rounded-lg bg-red-50 border border-red-100">
-                  <p className="text-xs font-semibold text-red-800 mb-1">شروط المصادرة</p>
-                  <p className="text-xs text-red-700 leading-relaxed">{contract.forfeitureConditions}</p>
-                </div>
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </>
         )}
 
         {/* Actions */}
         {canAct && deal.status !== "completed" && deal.status !== "cancelled" && deal.status !== "forfeited" && (
-          <Card className="border shadow-sm">
-            <CardHeader className="pb-3"><CardTitle className="text-base">الإجراءات المتاحة</CardTitle></CardHeader>
-            <CardContent>
-              <div className="flex gap-3 flex-wrap">
-                {isActive && (
-                  <Button onClick={() => setActiveAction("complete")} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <CheckCircle className="w-4 h-4" />
-                    إتمام الصفقة
-                  </Button>
-                )}
-                <Button variant="outline" onClick={() => setActiveAction("cancel")} className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/5">
-                  <XCircle className="w-4 h-4" />
-                  إلغاء الصفقة
-                </Button>
-                {isBuyer && (
-                  <Button variant="outline" onClick={() => setActiveAction("forfeit")} className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/5">
-                    <AlertCircle className="w-4 h-4" />
-                    الانسحاب
-                  </Button>
-                )}
-                {deal.status === "active" && (
-                  <Link href={`/deals/${id}/dispute`}>
-                    <Button variant="outline" className="gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50">
-                      <AlertCircle className="w-4 h-4" />
-                      فتح نزاع
-                    </Button>
-                  </Link>
-                )}
-                {isBuyer && deal.transferStatus !== "listed" && deal.status === "active" && (
-                  <Button variant="outline" onClick={() => { setActiveAction("list"); setListPrice(String(deal.amount ?? "")); }} className="gap-1.5 border-primary/30 text-primary hover:bg-primary/5">
-                    <Tag className="w-4 h-4" />
-                    عرض للتنازل
-                  </Button>
-                )}
-                {isBuyer && deal.transferStatus === "listed" && (
-                  <Button variant="outline" disabled className="gap-1.5 border-primary/30 text-primary bg-primary/5">
-                    <Tag className="w-4 h-4" />
-                    معروضة للتنازل
-                  </Button>
-                )}
-                {isBuyer && deal.transferStatus === "listed" && (
-                  <Button variant="outline" onClick={async () => {
-                    await unlistForTransfer.mutateAsync({ id });
-                    await invalidate();
-                    await queryClient.invalidateQueries({ queryKey: ["getMyListedDeals"] });
-                  }} disabled={unlistForTransfer.isPending} className="gap-1.5">
-                    إلغاء العرض
-                  </Button>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-3">
-                عند الإتمام يُحوَّل المبلغ تلقائياً للبائع. عند الإلغاء يُعاد للمشتري. عند الانسحاب يُصادر للبائع.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-2">
+            {isActive && (
+              <button
+                className="w-full py-4 rounded-[15px] text-sm font-extrabold"
+                style={{ background: "rgba(91,174,126,0.14)", color: "#5BAE7E", border: "1px solid rgba(91,174,126,0.2)" }}
+                onClick={() => setActiveAction("complete")}
+              >
+                ✓ إتمام الصفقة
+              </button>
+            )}
+            {deal.status === "active" && (
+              <DangerBtn onClick={() => navigate(`/deals/${id}/dispute`)}>
+                فتح نزاع
+              </DangerBtn>
+            )}
+            <DangerBtn onClick={() => setActiveAction("cancel")}>إلغاء الصفقة</DangerBtn>
+            {isBuyer && (
+              <SecondaryBtn onClick={() => setActiveAction("forfeit")}>الانسحاب</SecondaryBtn>
+            )}
+            {isBuyer && deal.transferStatus !== "listed" && deal.status === "active" && (
+              <SecondaryBtn onClick={() => { setActiveAction("list"); setListPrice(String(deal.amount ?? "")); }}>
+                عرض للتنازل
+              </SecondaryBtn>
+            )}
+            {isBuyer && deal.transferStatus === "listed" && (
+              <SecondaryBtn onClick={async () => {
+                await unlistForTransfer.mutateAsync({ id });
+                await invalidate();
+              }} disabled={unlistForTransfer.isPending}>
+                إلغاء عرض التنازل
+              </SecondaryBtn>
+            )}
+          </div>
         )}
 
         {/* Timeline */}
         {timeline && timeline.length > 0 && (
-          <Card className="border shadow-sm">
-            <CardHeader className="pb-3"><CardTitle className="text-base">سجل النشاط</CardTitle></CardHeader>
-            <CardContent>
-              <div className="relative">
-                <div className="absolute right-5 top-0 bottom-0 w-px bg-border" />
-                <div className="space-y-4">
-                  {[...timeline].reverse().map((event) => (
-                    <div key={event.id} className="flex items-start gap-4 relative">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 border-2 border-background flex items-center justify-center text-primary font-bold text-sm relative z-10 shrink-0">
-                        {timelineIcons[event.event] ?? "·"}
-                      </div>
-                      <div className="flex-1 pb-1">
-                        <p className="text-sm font-medium">{event.description}</p>
-                        {event.actorName && (
-                          <p className="text-xs text-muted-foreground mt-0.5">{event.actorName}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-0.5">{formatDateTime(event.createdAt)}</p>
-                      </div>
-                    </div>
-                  ))}
+          <div className="mt-4">
+            <p className="text-[15px] font-bold mb-3" style={{ color: "#E6E7E9" }}>سجل النشاط</p>
+            <div className="space-y-2">
+              {[...timeline].reverse().map((event) => (
+                <div
+                  key={event.id}
+                  className="flex items-start gap-3 rounded-[15px] p-4"
+                  style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.04)" }}
+                >
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    style={{ background: "#3C3F44", color: "#C4C8CE" }}
+                  >
+                    {event.event === "completed" ? "✓"
+                      : event.event === "cancelled" || event.event === "forfeited" ? "✕"
+                      : event.event === "disputed" || event.event === "dispute_opened" ? "!"
+                      : "·"}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: "#C4C8CE" }}>{event.description}</p>
+                    {event.actorName && (
+                      <p className="text-[11px] mt-0.5" style={{ color: "#6B7178" }}>{event.actorName}</p>
+                    )}
+                    <p className="text-[11px] mt-0.5" style={{ color: "#6B7178" }}>{formatDateTime(event.createdAt)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Action Dialog */}
+      <Dialog open={!!activeAction} onOpenChange={(open) => { if (!open) { setActiveAction(null); setReason(""); } }}>
+        <DialogContent style={{ background: "#212327", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <DialogHeader>
+            <DialogTitle style={{ color: "#E6E7E9" }}>{activeAction ? actionLabels[activeAction] : ""}</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            {activeAction === "complete" ? (
+              <p className="text-sm" style={{ color: "#8A8F98" }}>
+                بتأكيدك سيتم تحويل مبلغ {formatAmount(deal.amount)} للبائع تلقائياً. هذا الإجراء لا يمكن التراجع عنه.
+              </p>
+            ) : activeAction === "list" ? (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: "#A8ADB5" }}>سعر التنازل (ريال)</label>
+                  <input
+                    type="number"
+                    value={listPrice}
+                    onChange={(e) => setListPrice(e.target.value)}
+                    className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+                    style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.07)", color: "#E6E7E9" }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: "#A8ADB5" }}>وصف إضافي</label>
+                  <Textarea value={listDesc} onChange={(e) => setListDesc(e.target.value)} rows={2} placeholder="..." />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Action Dialog */}
-        <Dialog open={!!activeAction} onOpenChange={(open) => { if (!open) { setActiveAction(null); setReason(""); setListPrice(""); setListDesc(""); } }}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{activeAction ? actionLabels[activeAction] : ""}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3 py-2">
-              {activeAction === "complete" ? (
-                <p className="text-sm text-muted-foreground">
-                  بتأكيدك سيتم تحويل مبلغ {formatAmount(deal.amount)} للبائع تلقائياً. هذا الإجراء لا يمكن التراجع عنه.
+            ) : (
+              <>
+                <p className="text-sm mb-3" style={{ color: "#8A8F98" }}>
+                  {activeAction === "cancel"
+                    ? "يجب ذكر سبب الإلغاء. سيُعاد مبلغ العربون للمشتري."
+                    : "يجب ذكر سبب الانسحاب. سيُصادر مبلغ العربون لصالح البائع."}
                 </p>
-              ) : activeAction === "list" ? (
-                <>
-                  <p className="text-sm text-muted-foreground">
-                    اكتب سعر التنازل والوصف، ثم أكّد لعرض الصفقة في سوق التنازلات. المشترون الجدد يمكنهم طلب التنازل منك.
-                  </p>
-                  <div className="p-3 rounded-lg bg-secondary border border-border space-y-2">
-                    <p className="text-xs font-semibold text-foreground">تفاصيل العربون الحالية</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">مبلغ العربون المحجوز</span>
-                      <span className="text-sm font-bold text-foreground">{formatAmount(deal.amount)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">رسوم المنصة (٢٪)</span>
-                      <span className="text-sm font-medium text-muted-foreground">{formatAmount(deal.platformFee ?? 0)}</span>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-border pt-2">
-                      <span className="text-xs font-semibold text-foreground">العربون الصافي</span>
-                      <span className="text-sm font-bold text-primary">{formatAmount((deal.amount ?? 0) - (deal.platformFee ?? 0))}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium mb-1 block">سعر التنازل (ريال)</label>
-                    <input
-                      type="number"
-                      placeholder="مثلاً: 50000"
-                      value={listPrice}
-                      onChange={(e) => setListPrice(e.target.value)}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      min={1}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium mb-1 block">وصف إضافي</label>
-                    <Textarea
-                      placeholder="اكتب تفاصيل إضافية عن التنازل..."
-                      value={listDesc}
-                      onChange={(e) => setListDesc(e.target.value)}
-                      rows={2}
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-muted-foreground">
-                    {activeAction === "cancel"
-                      ? "يرجى ذكر سبب الإلغاء. سيُعاد مبلغ العربون للمشتري."
-                      : "يرجى ذكر سبب الانسحاب. سيُصادر مبلغ العربون لصالح البائع."}
-                  </p>
-                  <Textarea
-                    placeholder="اكتب السبب هنا..."
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    rows={3}
-                  />
-                </>
-              )}
-            </div>
-            <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => { setActiveAction(null); setReason(""); setListPrice(""); setListDesc(""); }}>إلغاء</Button>
-              <Button
-                onClick={() => {
-                  if (activeAction === "complete") {
-                    setReason("تم الإتمام");
-                  }
-                  handleAction();
-                }}
-                disabled={actionLoading || (activeAction !== "complete" && activeAction !== "list" && !reason.trim())}
-                className={activeAction ? actionColors[activeAction] : ""}
-              >
-                {actionLoading ? "جاري التنفيذ..." : "تأكيد"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+                <Textarea
+                  placeholder="اكتب السبب هنا..."
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  rows={3}
+                />
+              </>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <button
+              className="px-4 py-2 rounded-lg text-sm font-semibold"
+              style={{ background: "#2B2D31", color: "#A8ADB5", border: "1px solid rgba(255,255,255,0.07)" }}
+              onClick={() => { setActiveAction(null); setReason(""); }}
+            >
+              إلغاء
+            </button>
+            <button
+              className="px-5 py-2 rounded-lg text-sm font-bold disabled:opacity-50"
+              style={{
+                background: activeAction === "complete" ? "rgba(91,174,126,0.2)" : activeAction === "list" ? "#E6E7E9" : "rgba(203,96,96,0.2)",
+                color: activeAction === "complete" ? "#5BAE7E" : activeAction === "list" ? "#1A1B1E" : "#CB6060",
+              }}
+              onClick={() => {
+                if (activeAction === "complete") setReason("تم الإتمام");
+                handleAction();
+              }}
+              disabled={actionLoading || (activeAction !== "complete" && activeAction !== "list" && !reason.trim())}
+            >
+              {actionLoading ? "جاري التنفيذ..." : "تأكيد"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }

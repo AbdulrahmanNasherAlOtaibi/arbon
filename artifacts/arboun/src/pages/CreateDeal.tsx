@@ -1,30 +1,29 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCreateDeal, useListTemplates, getListDealsQueryKey, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
-import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Building2, Car, Briefcase, FileText, Shield, AlertCircle } from "lucide-react";
+import { useCreateDeal, getListDealsQueryKey, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
+import {
+  Layout,
+  PageHeader,
+  PrimaryBtn,
+  InkInput,
+  InkTextarea,
+} from "@/components/Layout";
+import { formatAmount } from "@/lib/helpers";
 
 const dealTypes = [
-  { value: "real_estate", label: "عقار", icon: Building2, desc: "شقق، فلل، أراضي، مكاتب" },
-  { value: "vehicle", label: "مركبة", icon: Car, desc: "سيارات، دراجات، مركبات" },
-  { value: "business", label: "تجاري", icon: Briefcase, desc: "محلات، مشاريع، امتيازات" },
-  { value: "other", label: "أخرى", icon: FileText, desc: "معاملات أخرى متنوعة" },
+  { value: "real_estate", label: "عقار", icon: "🏠" },
+  { value: "vehicle", label: "سيارة", icon: "🚗" },
+  { value: "business", label: "تجاري", icon: "🏪" },
+  { value: "other", label: "أخرى", icon: "📦" },
 ];
 
 export default function CreateDeal() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const createDeal = useCreateDeal();
-  const { data: templates } = useListTemplates();
 
   const [selectedType, setSelectedType] = useState<"real_estate" | "vehicle" | "business" | "other">("real_estate");
-  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [form, setForm] = useState({
     title: "",
     amount: "",
@@ -36,7 +35,14 @@ export default function CreateDeal() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const filteredTemplates = templates?.filter((t) => t.type === selectedType) ?? [];
+  const amount = Number(form.amount) || 0;
+  const fee = Math.round(amount * 0.02);
+  const net = amount - fee;
+
+  function set(k: string, v: string) {
+    setForm((f) => ({ ...f, [k]: v }));
+    setErrors((e) => { const n = { ...e }; delete n[k]; return n; });
+  }
 
   function validate() {
     const e: Record<string, string> = {};
@@ -51,10 +57,7 @@ export default function CreateDeal() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      return;
-    }
+    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     try {
       const deal = await createDeal.mutateAsync({
         data: {
@@ -63,225 +66,160 @@ export default function CreateDeal() {
           amount: Number(form.amount),
           sellerPhone: form.sellerPhone,
           description: form.description,
+          deadline: new Date(form.deadline).toISOString(),
           ...(form.propertyAddress ? { propertyAddress: form.propertyAddress } : {}),
           ...(form.vehicleInfo ? { vehicleInfo: form.vehicleInfo } : {}),
-          deadline: form.deadline,
-          ...(selectedTemplate ? { templateId: selectedTemplate } : {}),
         },
       });
-      await queryClient.invalidateQueries({ queryKey: getListDealsQueryKey() });
-      await queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getListDealsQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() }),
+      ]);
       navigate(`/deals/${deal.id}`);
-    } catch {
-      setErrors({ submit: "حدث خطأ أثناء إنشاء الصفقة. يرجى المحاولة مجدداً." });
-    }
+    } catch {}
   }
 
-  const platformFee = Number(form.amount) > 0 ? (Number(form.amount) * 0.02).toFixed(2) : "0";
+  const inputSt: React.CSSProperties = {
+    width: "100%",
+    background: "#2B2D31",
+    border: "1px solid rgba(255,255,255,0.07)",
+    borderRadius: 14,
+    padding: "15px 16px",
+    color: "#E6E7E9",
+    fontSize: 14,
+    fontFamily: "'Cairo', sans-serif",
+    fontWeight: 600,
+    outline: "none",
+  };
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Header */}
+      <PageHeader title="صفقة جديدة" onBack={() => navigate("/deals")} />
+
+      <form onSubmit={handleSubmit} className="px-5 pb-8 space-y-4">
+        {/* Deal type */}
         <div>
-          <h2 className="text-2xl font-bold">صفقة جديدة</h2>
-          <p className="text-muted-foreground mt-1">أنشئ عقد عربون محمي ومعتمد</p>
+          <label className="block text-[12.5px] font-bold mb-3" style={{ color: "#A8ADB5" }}>نوع الصفقة</label>
+          <div className="grid grid-cols-4 gap-2">
+            {dealTypes.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => setSelectedType(t.value as "real_estate" | "vehicle" | "business" | "other")}
+                className="flex flex-col items-center gap-1.5 py-3 rounded-[14px] transition-all"
+                style={
+                  selectedType === t.value
+                    ? { background: "#E6E7E9", color: "#1A1B1E", border: "1px solid #E6E7E9" }
+                    : { background: "#2B2D31", color: "#A8ADB5", border: "1px solid rgba(255,255,255,0.07)" }
+                }
+              >
+                <span className="text-xl">{t.icon}</span>
+                <span className="text-[11px] font-bold">{t.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Security Banner */}
-        <Card className="border border-primary/20 bg-primary/5 shadow-sm">
-          <CardContent className="p-4 flex items-center gap-3">
-            <Shield className="w-5 h-5 text-primary shrink-0" />
-            <p className="text-sm text-primary/80">
-              مبلغ العربون سيُحفظ في حساب ضمان مرخص من ساما. لا أحد يستطيع الوصول إليه إلا بعد إتمام الشروط المتفق عليها.
-            </p>
-          </CardContent>
-        </Card>
+        {/* Title */}
+        <div>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>عنوان الصفقة</label>
+          <input
+            style={inputSt}
+            placeholder="مثال: شقة - حي النرجس"
+            value={form.title}
+            onChange={(e) => set("title", e.target.value)}
+          />
+          {errors.title && <p className="text-[11px] mt-1" style={{ color: "#CB6060" }}>{errors.title}</p>}
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Deal Type */}
-          <Card className="border shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">نوع الصفقة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                {dealTypes.map((dt) => (
-                  <button
-                    key={dt.value}
-                    type="button"
-                    onClick={() => { setSelectedType(dt.value as "real_estate" | "vehicle" | "business" | "other"); setSelectedTemplate(null); }}
-                    className={`p-4 rounded-xl border-2 text-right transition-all ${
-                      selectedType === dt.value
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/30 bg-background"
-                    }`}
-                  >
-                    <dt.icon className={`w-5 h-5 mb-2 ${selectedType === dt.value ? "text-primary" : "text-muted-foreground"}`} />
-                    <p className="font-semibold text-sm">{dt.label}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{dt.desc}</p>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Amount */}
+        <div>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>قيمة العربون (ريال)</label>
+          <input
+            style={inputSt}
+            type="number"
+            placeholder="100,000"
+            value={form.amount}
+            onChange={(e) => set("amount", e.target.value)}
+          />
+          {errors.amount && <p className="text-[11px] mt-1" style={{ color: "#CB6060" }}>{errors.amount}</p>}
+        </div>
 
-          {/* Template Selection */}
-          {filteredTemplates.length > 0 && (
-            <Card className="border shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">قالب العقد</CardTitle>
-                <CardDescription>اختر قالباً جاهزاً أو اتركه فارغاً لكتابة شروطك</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTemplate(null)}
-                    className={`w-full p-3 rounded-lg border text-right text-sm transition-colors ${
-                      selectedTemplate === null ? "border-primary bg-primary/5" : "border-border hover:bg-secondary"
-                    }`}
-                  >
-                    <p className="font-medium">بدون قالب</p>
-                    <p className="text-xs text-muted-foreground">سأكتب الشروط بنفسي</p>
-                  </button>
-                  {filteredTemplates.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setSelectedTemplate(t.id)}
-                      className={`w-full p-3 rounded-lg border text-right text-sm transition-colors ${
-                        selectedTemplate === t.id ? "border-primary bg-primary/5" : "border-border hover:bg-secondary"
-                      }`}
-                    >
-                      <p className="font-medium">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+        {/* Seller phone */}
+        <div>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>رقم جوال البائع</label>
+          <input
+            style={inputSt}
+            type="tel"
+            placeholder="05XXXXXXXX"
+            value={form.sellerPhone}
+            onChange={(e) => set("sellerPhone", e.target.value)}
+            dir="ltr"
+          />
+          {errors.sellerPhone && <p className="text-[11px] mt-1" style={{ color: "#CB6060" }}>{errors.sellerPhone}</p>}
+        </div>
 
-          {/* Deal Info */}
-          <Card className="border shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">تفاصيل الصفقة</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="title">عنوان الصفقة *</Label>
-                <Input
-                  id="title"
-                  className="mt-1"
-                  placeholder="مثال: شقة في حي النرجس - الرياض"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                />
-                {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
-              </div>
+        {/* Description */}
+        <div>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>وصف الصفقة</label>
+          <textarea
+            style={{ ...inputSt, borderRadius: 14, resize: "none" } as React.CSSProperties}
+            placeholder="اكتب تفاصيل الصفقة..."
+            rows={3}
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+          />
+          {errors.description && <p className="text-[11px] mt-1" style={{ color: "#CB6060" }}>{errors.description}</p>}
+        </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="amount">مبلغ العربون (ر.س) *</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    className="mt-1"
-                    placeholder="50000"
-                    value={form.amount}
-                    onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                    min="1"
-                  />
-                  {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
-                  {Number(form.amount) > 0 && (
-                    <p className="text-xs text-muted-foreground mt-1">رسوم المنصة (٢٪): {platformFee} ر.س</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="deadline">الموعد النهائي للصفقة *</Label>
-                  <Input
-                    id="deadline"
-                    type="date"
-                    className="mt-1"
-                    value={form.deadline}
-                    onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-                    min={new Date().toISOString().split("T")[0]}
-                  />
-                  {errors.deadline && <p className="text-xs text-destructive mt-1">{errors.deadline}</p>}
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="sellerPhone">رقم جوال البائع *</Label>
-                <Input
-                  id="sellerPhone"
-                  type="tel"
-                  className="mt-1"
-                  placeholder="05XXXXXXXX"
-                  value={form.sellerPhone}
-                  onChange={(e) => setForm({ ...form, sellerPhone: e.target.value })}
-                  dir="ltr"
-                />
-                {errors.sellerPhone && <p className="text-xs text-destructive mt-1">{errors.sellerPhone}</p>}
-              </div>
-
-              <div>
-                <Label htmlFor="description">وصف الصفقة *</Label>
-                <Textarea
-                  id="description"
-                  className="mt-1"
-                  placeholder="صف الصفقة بشكل واضح ومفصل..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={3}
-                />
-                {errors.description && <p className="text-xs text-destructive mt-1">{errors.description}</p>}
-              </div>
-
-              {selectedType === "real_estate" && (
-                <div>
-                  <Label htmlFor="propertyAddress">عنوان العقار</Label>
-                  <Input
-                    id="propertyAddress"
-                    className="mt-1"
-                    placeholder="الحي، الشارع، المدينة"
-                    value={form.propertyAddress}
-                    onChange={(e) => setForm({ ...form, propertyAddress: e.target.value })}
-                  />
-                </div>
-              )}
-
-              {selectedType === "vehicle" && (
-                <div>
-                  <Label htmlFor="vehicleInfo">معلومات المركبة</Label>
-                  <Input
-                    id="vehicleInfo"
-                    className="mt-1"
-                    placeholder="الموديل، السنة، اللون، القاطع"
-                    value={form.vehicleInfo}
-                    onChange={(e) => setForm({ ...form, vehicleInfo: e.target.value })}
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {errors.submit && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-              <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
-              <p className="text-sm text-destructive">{errors.submit}</p>
-            </div>
-          )}
-
-          <div className="flex gap-3">
-            <Button type="submit" className="flex-1 gap-2" disabled={createDeal.isPending}>
-              {createDeal.isPending ? "جاري الإنشاء..." : "إنشاء الصفقة وإيداع العربون"}
-              {!createDeal.isPending && <ArrowRight className="w-4 h-4" />}
-            </Button>
+        {/* Extra fields by type */}
+        {selectedType === "real_estate" && (
+          <div>
+            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>عنوان العقار</label>
+            <input style={inputSt} placeholder="الحي، المدينة..." value={form.propertyAddress} onChange={(e) => set("propertyAddress", e.target.value)} />
           </div>
-        </form>
-      </div>
+        )}
+        {selectedType === "vehicle" && (
+          <div>
+            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>معلومات المركبة</label>
+            <input style={inputSt} placeholder="الماركة، الموديل، السنة..." value={form.vehicleInfo} onChange={(e) => set("vehicleInfo", e.target.value)} />
+          </div>
+        )}
+
+        {/* Deadline */}
+        <div>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>الموعد النهائي</label>
+          <input style={inputSt} type="date" value={form.deadline} onChange={(e) => set("deadline", e.target.value)} />
+          {errors.deadline && <p className="text-[11px] mt-1" style={{ color: "#CB6060" }}>{errors.deadline}</p>}
+        </div>
+
+        {/* Summary card */}
+        {amount > 0 && (
+          <div
+            className="rounded-[18px] p-5"
+            style={{
+              background: "linear-gradient(150deg, #34373D, #232528)",
+              border: "1px solid rgba(255,255,255,0.07)",
+            }}
+          >
+            <p className="text-xs font-semibold mb-2" style={{ color: "#8A8F98" }}>قيمة العربون المحجوز</p>
+            <p className="text-2xl font-extrabold mb-2" style={{ color: "#fff" }}>
+              {amount.toLocaleString("ar-SA")}
+              <span className="text-sm font-semibold ml-1" style={{ color: "#8A8F98" }}>ر.س</span>
+            </p>
+            <p
+              className="text-[11px] pt-3"
+              style={{ color: "#8A8F98", borderTop: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              رسوم المنصة ٢٪ ({fee.toLocaleString("ar-SA")} ر.س) · صافي للبائع {net.toLocaleString("ar-SA")} ر.س
+            </p>
+          </div>
+        )}
+
+        <PrimaryBtn type="submit" disabled={createDeal.isPending}>
+          {createDeal.isPending ? "جاري إنشاء الصفقة..." : "إنشاء الصفقة وحفظ العربون"}
+        </PrimaryBtn>
+      </form>
     </Layout>
   );
 }

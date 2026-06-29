@@ -1,190 +1,187 @@
-import { Link } from "wouter";
-import { useGetDashboardSummary, useGetRecentActivity } from "@workspace/api-client-react";
-import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "wouter";
+import {
+  useGetDashboardSummary,
+  useGetRecentActivity,
+  useGetMe,
+} from "@workspace/api-client-react";
+import {
+  Layout,
+  InkCard,
+  Pill,
+  DealCard,
+  statusToPillVariant,
+} from "@/components/Layout";
+import { formatAmount, formatDateTime, statusLabel, typeIcon } from "@/lib/helpers";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatAmount, formatDateTime, statusLabel, statusColor, typeLabel } from "@/lib/helpers";
-import { PlusCircle, TrendingUp, Shield, AlertCircle, CheckCircle, Clock, Briefcase } from "lucide-react";
-
-function StatCard({ title, value, icon: Icon, sub, color = "text-foreground" }: {
-  title: string;
-  value: string | number;
-  icon: React.ElementType;
-  sub?: string;
-  color?: string;
-}) {
-  return (
-    <Card className="border shadow-sm hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">{title}</p>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
-          </div>
-          <div className="p-2.5 rounded-lg bg-primary/8">
-            <Icon className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-const eventIcons: Record<string, React.ElementType> = {
-  created: PlusCircle,
-  completed: CheckCircle,
-  cancelled: AlertCircle,
-  disputed: AlertCircle,
-  buyer_signed: Shield,
-  seller_signed: Shield,
-  forfeited: AlertCircle,
-  default: Clock,
-};
-
-const eventColors: Record<string, string> = {
-  created:      "text-primary bg-primary/8",
-  completed:    "text-emerald-600 bg-emerald-50",
-  cancelled:    "text-muted-foreground bg-muted",
-  disputed:     "text-amber-600 bg-amber-50",
-  buyer_signed: "text-emerald-600 bg-emerald-50",
-  seller_signed:"text-emerald-600 bg-emerald-50",
-  forfeited:    "text-red-600 bg-red-50",
-  default:      "text-primary bg-primary/8",
-};
 
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const { data: summary, isLoading: summaryLoading } = useGetDashboardSummary();
   const { data: activity, isLoading: activityLoading } = useGetRecentActivity();
+  const { data: me } = useGetMe();
 
   return (
     <Layout>
-      <div className="space-y-8">
-        {/* Welcome */}
-        <div className="flex items-center justify-between">
+      <div className="px-5 py-2 space-y-5">
+        {/* Greeting */}
+        <div className="flex items-center justify-between py-2">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">لوحة القيادة</h2>
-            <p className="text-muted-foreground mt-1">نظرة عامة على صفقاتك وأنشطتك</p>
+            <p className="text-[13px] font-semibold" style={{ color: "#8A8F98" }}>
+              أهلاً،{" "}
+              <span style={{ color: "#E6E7E9" }}>
+                {me?.name?.split(" ")[0] ?? "مستخدم"}
+              </span>
+            </p>
           </div>
           <Link href="/deals/new">
-            <Button className="gap-2 shadow-sm">
-              <PlusCircle className="w-4 h-4" />
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-bold"
+              style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.08)", color: "#E6E7E9" }}
+            >
+              <span className="text-base">＋</span>
               صفقة جديدة
-            </Button>
+            </button>
           </Link>
         </div>
 
-        {/* Stats Grid */}
+        {/* Balance Card */}
         {summaryLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 rounded-xl" />
-            ))}
-          </div>
+          <Skeleton className="h-44 rounded-3xl" />
         ) : summary ? (
-          <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard title="إجمالي الصفقات" value={summary.totalDeals} icon={Briefcase} sub={`${summary.dealsAsbuyer} كمشتري · ${summary.dealsAsSeller} كبائع`} />
-              <StatCard title="صفقات نشطة" value={summary.activeDeals} icon={TrendingUp} color="text-emerald-700" sub="في حساب الضمان" />
-              <StatCard title="صفقات مكتملة" value={summary.completedDeals} icon={CheckCircle} color="text-emerald-700" />
-              <StatCard title="بانتظار التوقيع" value={summary.pendingSignature} icon={Clock} color="text-amber-700" />
-            </div>
+          <div
+            className="rounded-3xl p-6 relative overflow-hidden"
+            style={{
+              background: "linear-gradient(150deg, #3A3D43 0%, #292B2F 55%, #1F2124 100%)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            {/* Glow */}
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                top: -60,
+                left: -40,
+                width: 220,
+                height: 220,
+                background: "radial-gradient(circle, rgba(220,224,230,0.1), transparent 65%)",
+              }}
+            />
+            {/* Shield watermark */}
+            <svg
+              className="absolute"
+              style={{ bottom: -30, left: -10, opacity: 0.06, transform: "rotate(-12deg)" }}
+              width="140"
+              height="160"
+              viewBox="0 0 100 100"
+            >
+              <path d="M50 4 L90 26 V62 C90 79 72 91 50 96 C28 91 10 79 10 62 V26 Z" fill="#E6E7E9" />
+            </svg>
 
-            {/* Amounts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card className="border bg-primary/5 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-primary/10">
-                      <Shield className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">إجمالي المبالغ المحجوزة</p>
-                      <p className="text-3xl font-bold text-primary mt-0.5">{formatAmount(summary.totalAmountEscrowed)}</p>
-                      <p className="text-xs text-muted-foreground mt-1">محفوظة في حسابات الضمان</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border bg-emerald-50 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-emerald-100">
-                      <CheckCircle className="w-6 h-6 text-emerald-700" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">إجمالي المبالغ المكتملة</p>
-                      <p className="text-3xl font-bold text-emerald-700 mt-0.5">{formatAmount(summary.totalAmountCompleted)}</p>
-                      <p className="text-xs text-muted-foreground mt-1">تم تحويلها بنجاح</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <p
+              className="flex items-center gap-2 text-[13px] font-semibold mb-2 relative z-10"
+              style={{ color: "#A8ADB5" }}
+            >
+              🛡️ الرصيد المحجوز
+            </p>
+            <p
+              className="font-extrabold mb-5 relative z-10"
+              style={{ fontSize: 34, color: "#fff", letterSpacing: -1 }}
+            >
+              {summary.totalAmountEscrowed.toLocaleString("ar-SA")}
+              <span className="text-lg font-semibold ml-2" style={{ color: "#A8ADB5" }}>ر.س</span>
+            </p>
+            <div className="flex gap-3 relative z-10">
+              {[
+                { n: summary.activeDeals, l: "صفقات نشطة" },
+                { n: summary.completedDeals, l: "صفقات مكتملة" },
+              ].map((s) => (
+                <div
+                  key={s.l}
+                  className="flex-1 rounded-[14px] p-3"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.04)" }}
+                >
+                  <p className="text-lg font-extrabold text-white">{s.n}</p>
+                  <p className="text-[11px] mt-1" style={{ color: "#8A8F98" }}>{s.l}</p>
+                </div>
+              ))}
             </div>
-
-            {summary.disputedDeals > 0 && (
-              <Card className="border border-amber-200 bg-amber-50 shadow-sm">
-                <CardContent className="p-4 flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-                  <p className="text-sm text-amber-900">
-                    لديك <span className="font-bold">{summary.disputedDeals}</span> صفقة متنازع عليها قيد المراجعة. سيتم البت فيها خلال 48 ساعة.
-                  </p>
-                  <Link href="/deals?status=disputed" className="mr-auto">
-                    <Button variant="outline" size="sm" className="text-amber-800 border-amber-300 hover:bg-amber-100 shrink-0">
-                      عرض التفاصيل
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            )}
-          </>
+          </div>
         ) : null}
 
-        {/* Recent Activity */}
+        {/* Quick Actions */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { icon: "➕", label: "صفقة جديدة", href: "/deals/new" },
+            { icon: "🔁", label: "سوق التنازلات", href: "/transfers/marketplace" },
+            { icon: "📄", label: "النماذج", href: "/templates" },
+          ].map((qa) => (
+            <Link key={qa.href} href={qa.href}>
+              <div
+                className="rounded-[16px] py-4 flex flex-col items-center gap-2"
+                style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)" }}
+              >
+                <div
+                  className="w-10 h-10 rounded-[11px] flex items-center justify-center text-lg"
+                  style={{ background: "#3C3F44" }}
+                >
+                  {qa.icon}
+                </div>
+                <span className="text-[11.5px] font-bold" style={{ color: "#A8ADB5" }}>{qa.label}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Recent Deals */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">النشاط الأخير</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[15px] font-bold" style={{ color: "#E6E7E9" }}>آخر الصفقات</h3>
+            <Link href="/deals">
+              <span className="text-xs font-semibold" style={{ color: "#8A8F98" }}>عرض الكل</span>
+            </Link>
+          </div>
+
           {activityLoading ? (
             <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-[18px]" />)}
             </div>
           ) : activity && activity.length > 0 ? (
-            <Card className="border shadow-sm divide-y divide-border">
-              {activity.slice(0, 8).map((event) => {
-                const IconComponent = eventIcons[event.event] ?? eventIcons.default;
-                const colorClass = eventColors[event.event] ?? eventColors.default;
-                return (
-                  <Link key={event.id} href={`/deals/${event.dealId}`}>
-                    <div className="p-4 flex items-start gap-4 hover:bg-secondary/50 transition-colors cursor-pointer">
-                      <div className={`p-2 rounded-full ${colorClass} shrink-0`}>
-                        <IconComponent className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">{event.dealTitle}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{event.description}</p>
-                      </div>
-                      {event.amount && (
-                        <p className="text-sm font-bold text-primary shrink-0">{formatAmount(event.amount)}</p>
-                      )}
-                      <p className="text-xs text-muted-foreground shrink-0 mr-2">{formatDateTime(event.createdAt)}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </Card>
+            activity.slice(0, 5).map((event) => (
+              <DealCard
+                key={event.id}
+                icon={event.dealTitle?.includes("سيارة") || event.dealTitle?.includes("لكزس") || event.dealTitle?.includes("تويوتا") ? "🚗"
+                  : event.dealTitle?.includes("أرض") || event.dealTitle?.includes("تجاري") || event.dealTitle?.includes("محل") ? "🏢"
+                  : "🏠"}
+                title={event.dealTitle ?? "صفقة"}
+                sub={formatDateTime(event.createdAt)}
+                amount={event.amount ? formatAmount(event.amount) : ""}
+                status={
+                  event.event === "completed" || event.event === "buyer_signed" || event.event === "seller_signed"
+                    ? "success"
+                    : event.event === "cancelled" || event.event === "forfeited"
+                    ? event.event === "forfeited" ? "danger" : "muted"
+                    : event.event === "disputed"
+                    ? "warning"
+                    : "warning"
+                }
+                statusText={event.description ?? ""}
+                progress={
+                  event.event === "completed" ? 4
+                  : event.event === "seller_signed" || event.event === "buyer_signed" ? 3
+                  : event.event === "created" ? 1
+                  : 2
+                }
+                onClick={() => navigate(`/deals/${event.dealId}`)}
+              />
+            ))
           ) : (
-            <Card className="border shadow-sm">
-              <CardContent className="p-12 text-center">
-                <Clock className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground">لا يوجد نشاط حتى الآن</p>
-                <Link href="/deals/new">
-                  <Button variant="outline" size="sm" className="mt-4">
-                    أنشئ أول صفقة
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <InkCard className="text-center py-10">
+              <p className="text-2xl mb-2">🔒</p>
+              <p className="text-sm font-semibold" style={{ color: "#8A8F98" }}>لا يوجد نشاط بعد</p>
+              <Link href="/deals/new">
+                <p className="text-xs mt-2 font-bold" style={{ color: "#E6E7E9" }}>أنشئ أول صفقة →</p>
+              </Link>
+            </InkCard>
           )}
         </div>
       </div>

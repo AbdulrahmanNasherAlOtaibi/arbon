@@ -14,6 +14,7 @@ import TransferMarketplace from "@/pages/TransferMarketplace";
 import MyListings from "@/pages/MyListings";
 import TransferRequests from "@/pages/TransferRequests";
 import Landing from "@/pages/Landing";
+import Notifications from "@/pages/Notifications";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/transfers/marketplace" component={TransferMarketplace} />
       <Route path="/transfers/my-listings" component={MyListings} />
       <Route path="/transfers/requests" component={TransferRequests} />
+      <Route path="/notifications" component={Notifications} />
       <Route component={NotFound} />
     </Switch>
   );

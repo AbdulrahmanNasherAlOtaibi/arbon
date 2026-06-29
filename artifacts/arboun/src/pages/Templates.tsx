@@ -1,30 +1,27 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { useListTemplates } from "@workspace/api-client-react";
-import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Layout, FilterChip, InkCard } from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, Car, Briefcase, FileText, ChevronLeft, PlusCircle } from "lucide-react";
-
-const typeConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  real_estate: { label: "عقار",  icon: Building2, color: "text-primary bg-primary/10" },
-  vehicle:     { label: "مركبة", icon: Car,        color: "text-emerald-700 bg-emerald-50" },
-  business:    { label: "تجاري", icon: Briefcase,  color: "text-violet-700 bg-violet-50" },
-  other:       { label: "أخرى",  icon: FileText,   color: "text-muted-foreground bg-muted" },
-};
 
 const typeOptions = [
-  { value: "",             label: "الكل" },
-  { value: "real_estate",  label: "عقار" },
-  { value: "vehicle",      label: "مركبة" },
-  { value: "business",     label: "تجاري" },
-  { value: "other",        label: "أخرى" },
+  { value: "", label: "الكل" },
+  { value: "real_estate", label: "عقار" },
+  { value: "vehicle", label: "مركبة" },
+  { value: "business", label: "تجاري" },
+  { value: "other", label: "أخرى" },
 ];
 
+const typeDisplay: Record<string, { icon: string; label: string }> = {
+  real_estate: { icon: "🏠", label: "عقار" },
+  vehicle: { icon: "🚗", label: "مركبة" },
+  business: { icon: "🏪", label: "تجاري" },
+  other: { icon: "📦", label: "أخرى" },
+};
+
 export default function Templates() {
+  const [, navigate] = useLocation();
   const [selectedType, setSelectedType] = useState("");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const { data: templates, isLoading } = useListTemplates(
     selectedType ? { type: selectedType as "real_estate" | "vehicle" | "business" | "other" } : {},
@@ -33,100 +30,58 @@ export default function Templates() {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">قوالب العقود</h2>
-            <p className="text-muted-foreground mt-1">اختر القالب المناسب لنوع صفقتك وابدأ بحماية حقوقك فوراً</p>
-          </div>
+      <div className="px-5 py-4">
+        <div className="mb-4">
+          <h2 className="text-xl font-extrabold" style={{ color: "#E6E7E9" }}>قوالب العقود</h2>
+          <p className="text-[12.5px] mt-1 leading-relaxed" style={{ color: "#8A8F98" }}>
+            اختر القالب المناسب لنوع صفقتك وابدأ إنشاء عقد رقمي موثق
+          </p>
         </div>
 
-        {/* Filter */}
-        <div className="flex gap-2 flex-wrap">
+        {/* Filter chips */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-none mb-5 pb-1">
           {typeOptions.map((opt) => (
-            <button
+            <FilterChip
               key={opt.value}
+              label={opt.label}
+              active={selectedType === opt.value}
               onClick={() => setSelectedType(opt.value)}
-              className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
-                selectedType === opt.value
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background border-border text-foreground hover:bg-secondary"
-              }`}
-            >
-              {opt.label}
-            </button>
+            />
           ))}
         </div>
 
-        {/* Templates Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)}
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-[18px]" />)}
           </div>
         ) : !templates || templates.length === 0 ? (
-          <Card className="border shadow-sm">
-            <CardContent className="p-12 text-center">
-              <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-muted-foreground">لا توجد قوالب لهذا النوع</p>
-            </CardContent>
-          </Card>
+          <InkCard className="text-center py-12">
+            <p className="text-3xl mb-2">📄</p>
+            <p className="text-sm" style={{ color: "#8A8F98" }}>لا توجد قوالب</p>
+          </InkCard>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {templates.map((template) => {
-              const config = typeConfig[template.type] ?? typeConfig.other;
-              const IconComponent = config.icon;
-              const isExpanded = expandedId === template.id;
-
+              const d = typeDisplay[template.type] ?? { icon: "📦", label: "أخرى" };
               return (
-                <Card key={template.id} className="border shadow-sm hover:shadow-md transition-shadow">
-                  <CardContent className="p-5">
-                    <div
-                      className="flex items-start gap-4 cursor-pointer"
-                      onClick={() => setExpandedId(isExpanded ? null : template.id)}
-                    >
-                      <div className={`p-3 rounded-xl ${config.color} shrink-0`}>
-                        <IconComponent className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <div>
-                            <h3 className="font-semibold">{template.name}</h3>
-                            <p className="text-sm text-muted-foreground mt-0.5">{template.description}</p>
-                          </div>
-                          <ChevronLeft className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ${isExpanded ? "-rotate-90" : "rotate-90"}`} />
-                        </div>
-                      </div>
-                    </div>
-
-                    {isExpanded && (
-                      <div className="mt-4 pt-4 border-t space-y-4">
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">الشروط العامة</p>
-                          <p className="text-sm leading-relaxed bg-secondary/30 rounded-lg p-3">{template.terms}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                            <p className="text-xs font-semibold text-emerald-800 mb-1">شروط الاسترجاع</p>
-                            <p className="text-xs text-emerald-700 leading-relaxed">{template.refundConditions}</p>
-                          </div>
-                          <div className="p-3 rounded-lg bg-red-50 border border-red-100">
-                            <p className="text-xs font-semibold text-red-800 mb-1">شروط المصادرة</p>
-                            <p className="text-xs text-red-700 leading-relaxed">{template.forfeitureConditions}</p>
-                          </div>
-                        </div>
-                        <div className="flex justify-end">
-                          <Link href={`/deals/new?template=${template.id}&type=${template.type}`}>
-                            <Button size="sm" className="gap-1.5">
-                              <PlusCircle className="w-3.5 h-3.5" />
-                              إنشاء صفقة بهذا القالب
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <button
+                  key={template.id}
+                  className="w-full flex items-center gap-4 rounded-[18px] p-4 text-right"
+                  style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)" }}
+                  onClick={() => navigate(`/deals/new?template=${template.id}&type=${template.type}`)}
+                >
+                  <div
+                    className="w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl flex-shrink-0"
+                    style={{ background: "#3C3F44" }}
+                  >
+                    {d.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm" style={{ color: "#E6E7E9" }}>{template.name}</p>
+                    <p className="text-[11.5px] mt-1 leading-snug" style={{ color: "#8A8F98" }}>{template.description}</p>
+                  </div>
+                  <span className="text-lg flex-shrink-0" style={{ color: "#6B7178" }}>‹</span>
+                </button>
               );
             })}
           </div>

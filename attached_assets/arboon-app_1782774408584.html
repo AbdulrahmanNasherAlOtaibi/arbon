@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عربون</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink-950: #141518;
+    --ink-900: #1A1B1E;
+    --ink-850: #212327;
+    --ink-800: #2B2D31;
+    --ink-750: #33363B;
+    --ink-700: #3C3F44;
+    --ink-650: #45484E;
+    --ink-600: #4E5258;
+    --slate-500: #6B7178;
+    --slate-400: #8A8F98;
+    --slate-300: #A8ADB5;
+    --slate-200: #C4C8CE;
+    --slate-100: #E6E7E9;
+    --slate-50: #F3F4F5;
+    --success: #5BAE7E;
+    --success-bg: rgba(91,174,126,0.14);
+    --warning: #D0A84F;
+    --warning-bg: rgba(208,168,79,0.14);
+    --danger: #CB6060;
+    --danger-bg: rgba(203,96,96,0.14);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(80,84,92,0.25), transparent 60%),
+      radial-gradient(900px 500px at 10% 110%, rgba(60,63,68,0.3), transparent 55%),
+      #0C0D0F;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 16px;
+  }
+
+  /* ───── PHONE ───── */
+  .phone {
+    width: 340px;
+    height: 720px;
+    background: linear-gradient(160deg, #2A2C31, #161719);
+    border-radius: 48px;
+    padding: 6px;
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.04),
+      0 2px 4px rgba(255,255,255,0.06) inset,
+      0 50px 100px -25px rgba(0,0,0,0.85),
+      0 0 80px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .phone-inner {
+    width: 100%;
+    height: 100%;
+    background: var(--ink-900);
+    border-radius: 42px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .notch {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 30px;
+    background: #000;
+    border-radius: 50px;
+    z-index: 100;
+  }
+
+  /* ───── SCREENS ───── */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    background: var(--ink-900);
+  }
+  .screen.active { display: flex; animation: fadeIn 0.35s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 28px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-100);
+    flex-shrink: 0;
+  }
+  .status-bar .icons { display: flex; gap: 6px; font-size: 12px; }
+
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+  .scroll.with-nav { padding-bottom: 92px; }
+
+  /* ───── LOGO ───── */
+  .logo-mark { position: relative; display: inline-block; }
+  .logo-mark svg { display: block; }
+
+  /* ───── HEADER ───── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0 18px;
+  }
+  .header .ttl { font-size: 20px; font-weight: 800; color: var(--slate-100); }
+  .header .logo-row { display: flex; align-items: center; gap: 9px; }
+
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 13px;
+    background: var(--ink-800);
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--slate-300);
+    position: relative;
+    font-size: 16px;
+  }
+  .icon-btn .badge {
+    position: absolute; top: 9px; left: 10px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--danger); border: 2px solid var(--ink-800);
+  }
+  .icon-btn svg { width: 19px; height: 19px; }
+
+  .back-btn { font-size: 20px; }
+
+  /* ───── BALANCE CARD ───── */
+  .balance {
+    position: relative;
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 18px;
+    background:
+      linear-gradient(150deg, #3A3D43 0%, #292B2F 55%, #1F2124 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .balance::after {
+    content: '';
+    position: absolute;
+    top: -60px; left: -40px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(220,224,230,0.1), transparent 65%);
+    pointer-events: none;
+  }
+  .balance .shield-bg {
+    position: absolute;
+    bottom: -30px; left: -10px;
+    opacity: 0.06;
+    transform: rotate(-12deg);
+  }
+  .balance .lbl {
+    font-size: 13px; color: var(--slate-300); font-weight: 600;
+    display: flex; align-items: center; gap: 7px; margin-bottom: 10px;
+  }
+  .balance .amt {
+    font-size: 36px; font-weight: 800; color: #fff;
+    letter-spacing: -1px; margin-bottom: 18px;
+  }
+  .balance .amt span { font-size: 17px; color: var(--slate-300); font-weight: 600; margin-right: 5px; }
+  .balance .stats { display: flex; gap: 11px; position: relative; z-index: 2; }
+  .balance .stat {
+    flex: 1; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 14px; padding: 12px 14px;
+  }
+  .balance .stat .n { font-size: 19px; font-weight: 800; color: #fff; }
+  .balance .stat .l { font-size: 11px; color: var(--slate-400); margin-top: 3px; }
+
+  /* ───── QUICK ACTIONS ───── */
+  .quick-actions { display: flex; gap: 11px; margin-bottom: 20px; }
+  .qa {
+    flex: 1; background: var(--ink-800);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px; padding: 15px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .qa .qa-ic {
+    width: 38px; height: 38px; border-radius: 11px;
+    background: var(--ink-700);
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+  }
+  .qa span { font-size: 11.5px; font-weight: 700; color: var(--slate-300); }
+
+  /* ───── SECTION ───── */
+  .sec {
+    display: flex; justify-content: space-between; align-items: center;
+    margin: 4px 0 12px;
+  }
+  .sec h3 { font-size: 15px; font-weight: 700; color: var(--slate-100); }
+  .sec a { font-size: 12px; color: var(--slate-400); font-weight: 600; }
+
+  /* ───── DEAL CARD ───── */
+  .deal {
+    background: var(--ink-800);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 18px; padding: 15px; margin-bottom: 11px;
+  }
+  .deal-top { display: flex; align-items: center; gap: 12px; }
+  .deal-ic {
+    width: 44px; height: 44px; border-radius: 13px;
+    background: var(--ink-700);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; flex-shrink: 0;
+  }
+  .deal-meta { flex: 1; }
+  .deal-meta .t { font-size: 14px; font-weight: 700; color: var(--slate-100); margin-bottom: 2px; }
+  .deal-meta .s { font-size: 11.5px; color: var(--slate-400); }
+  .deal-amt { font-size: 15px; font-weight: 800; color: var(--slate-100); white-space: nowrap; }
+  .prog { display: flex; gap: 4px; margin-top: 13px; }
+  .prog .seg { flex: 1; height: 4px; border-radius: 2px; background: var(--ink-650); }
+  .prog .seg.done { background: var(--slate-200); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; padding: 5px 11px;
+    border-radius: 50px; margin-top: 11px;
+  }
+  .pill.pending { background: var(--warning-bg); color: var(--warning); }
+  .pill.success { background: var(--success-bg); color: var(--success); }
+  .pill.danger { background: var(--danger-bg); color: var(--danger); }
+
+  /* ───── BOTTOM NAV ───── */
+  .nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 11px 6px 26px;
+    background: linear-gradient(to top, var(--ink-850) 75%, rgba(33,35,39,0.92));
+    border-top: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(16px);
+    z-index: 50;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    color: var(--slate-500); flex: 1; cursor: pointer;
+    transition: color 0.25s;
+  }
+  .nav-item svg { width: 23px; height: 23px; }
+  .nav-item span { font-size: 10px; font-weight: 700; }
+  .nav-item.active { color: var(--slate-100); }
+  .nav-item .nav-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: transparent; margin-top: -1px;
+  }
+  .nav-item.active .nav-dot { background: var(--slate-100); }
+
+  /* ───── FORM ───── */
+  .field { margin-bottom: 16px; }
+  .field label { font-size: 12.5px; font-weight: 700; color: var(--slate-300); margin-bottom: 8px; display: block; }
+  .field input {
+    width: 100%; background: var(--ink-800);
+    border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;
+    padding: 15px 16px; color: var(--slate-100);
+    font-size: 14px; font-family: 'Cairo'; font-weight: 600;
+  }
+  .field input::placeholder { color: var(--slate-500); font-weight: 500; }
+  .field input:focus { outline: none; border-color: var(--slate-400); }
+
+  .pills-sel { display: flex; gap: 9px; }
+  .psel {
+    flex: 1; text-align: center; padding: 13px;
+    border-radius: 14px; background: var(--ink-800);
+    border: 1px solid rgba(255,255,255,0.07);
+    font-size: 13px; font-weight: 700; color: var(--slate-300);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .psel-ic { font-size: 18px; display: block; margin-bottom: 5px; }
+  .psel.on { background: var(--slate-100); color: var(--ink-900); border-color: var(--slate-100); }
+
+  .btn {
+    width: 100%; padding: 16px; border-radius: 15px;
+    font-size: 15px; font-weight: 800; font-family: 'Cairo';
+    text-align: center; border: none; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-pri { background: linear-gradient(135deg, #F2F3F4, #C4C8CE); color: var(--ink-900); }
+  .btn-sec { background: transparent; border: 1px solid var(--ink-650); color: var(--slate-300); }
+  .btn-danger { background: transparent; border: 1px solid rgba(203,96,96,0.35); color: var(--danger); }
+
+  /* ───── LOGIN ───── */
+  .login {
+    height: 100%; display: flex; flex-direction: column;
+    justify-content: center; padding: 0 24px;
+  }
+  .login .brand { text-align: center; margin-bottom: 40px; }
+  .login .brand h1 { font-size: 30px; font-weight: 800; color: var(--slate-100); margin: 16px 0 7px; }
+  .login .brand p { font-size: 13px; color: var(--slate-400); font-weight: 600; }
+  .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+  .divider .ln { flex: 1; height: 1px; background: var(--ink-700); }
+  .divider span { font-size: 11px; color: var(--slate-500); }
+  .login-foot { text-align: center; margin-top: 24px; font-size: 13px; color: var(--slate-400); }
+  .login-foot b { color: var(--slate-100); font-weight: 700; cursor: pointer; }
+
+  /* ───── DETAIL ───── */
+  .detail-hero { text-align: center; padding: 14px 0 24px; }
+  .detail-hero .ic {
+    width: 60px; height: 60px; border-radius: 18px; margin: 0 auto 14px;
+    background: var(--ink-800); border: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center; font-size: 27px;
+  }
+  .detail-hero .a { font-size: 32px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .detail-hero .a span { font-size: 17px; color: var(--slate-400); }
+  .detail-hero .s { font-size: 13px; color: var(--slate-400); }
+
+  .stepper { display: flex; margin: 6px 0 22px; }
+  .step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .step .c {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--ink-700); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; color: var(--slate-400);
+    margin-bottom: 9px; z-index: 2; border: 2px solid var(--ink-900);
+  }
+  .step.done .c { background: var(--slate-100); color: var(--ink-900); }
+  .step.cur .c { background: var(--ink-900); border-color: var(--slate-100); color: var(--slate-100); }
+  .step::before {
+    content: ''; position: absolute; top: 15px; right: 50%;
+    width: 100%; height: 2px; background: var(--ink-650); z-index: 1;
+  }
+  .step:first-child::before { display: none; }
+  .step.done::before, .step.cur::before { background: var(--slate-200); }
+  .step span { font-size: 9.5px; color: var(--slate-400); font-weight: 600; text-align: center; }
+  .step.done span, .step.cur span { color: var(--slate-200); }
+
+  .infobox { background: var(--ink-800); border: 1px solid rgba(255,255,255,0.05); border-radius: 18px; padding: 6px 16px; margin-bottom: 14px; }
+  .irow { display: flex; justify-content: space-between; padding: 12px 0; font-size: 13px; border-bottom: 1px solid var(--ink-750); }
+  .irow:last-child { border-bottom: none; }
+  .irow .k { color: var(--slate-400); }
+  .irow .v { color: var(--slate-100); font-weight: 700; }
+
+  /* ───── FILTER ───── */
+  .filters { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .chip {
+    white-space: nowrap; font-size: 12px; font-weight: 700;
+    padding: 9px 16px; border-radius: 50px;
+    background: var(--ink-800); color: var(--slate-300);
+    border: 1px solid rgba(255,255,255,0.05); cursor: pointer;
+  }
+  .chip.on { background: var(--slate-100); color: var(--ink-900); }
+
+  .mcard { background: var(--ink-800); border: 1px solid rgba(255,255,255,0.05); border-radius: 18px; padding: 16px; margin-bottom: 11px; }
+  .mhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; }
+  .mtag { font-size: 10.5px; font-weight: 700; color: var(--slate-400); background: var(--ink-700); padding: 4px 11px; border-radius: 50px; }
+  .mprice { font-size: 16px; font-weight: 800; color: var(--slate-100); }
+  .mtitle { font-size: 14px; font-weight: 700; color: var(--slate-100); margin-bottom: 5px; }
+  .mloc { font-size: 11.5px; color: var(--slate-400); margin-bottom: 12px; }
+  .mfoot { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--ink-750); }
+  .mdep { font-size: 11px; color: var(--slate-400); }
+  .mdep b { color: var(--slate-100); }
+  .mcta { font-size: 11.5px; font-weight: 700; color: var(--ink-900); background: var(--slate-100); padding: 8px 15px; border-radius: 50px; cursor: pointer; }
+
+  /* ───── TEMPLATE ───── */
+  .tcard { display: flex; align-items: center; gap: 14px; background: var(--ink-800); border: 1px solid rgba(255,255,255,0.05); border-radius: 18px; padding: 17px; margin-bottom: 11px; cursor: pointer; }
+  .tcard .ti { width: 48px; height: 48px; border-radius: 14px; background: var(--ink-700); display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0; }
+  .tcard .tt { font-size: 14px; font-weight: 700; color: var(--slate-100); margin-bottom: 3px; }
+  .tcard .td { font-size: 11.5px; color: var(--slate-400); line-height: 1.4; }
+  .tcard .tarrow { color: var(--slate-500); font-size: 18px; }
+
+  /* ───── PROFILE ───── */
+  .phead { display: flex; flex-direction: column; align-items: center; padding: 12px 0 24px; }
+  .avatar {
+    width: 84px; height: 84px; border-radius: 50%;
+    background: linear-gradient(140deg, var(--ink-600), var(--ink-750));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; font-weight: 800; color: var(--slate-100);
+    margin-bottom: 13px; border: 2px solid rgba(255,255,255,0.1);
+  }
+  .pname { font-size: 18px; font-weight: 800; color: var(--slate-100); margin-bottom: 6px; }
+  .vbadge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: var(--success); background: var(--success-bg); padding: 5px 13px; border-radius: 50px; }
+  .litem { display: flex; align-items: center; gap: 13px; background: var(--ink-800); border: 1px solid rgba(255,255,255,0.04); border-radius: 15px; padding: 14px; margin-bottom: 9px; cursor: pointer; }
+  .litem .li { width: 36px; height: 36px; border-radius: 11px; background: var(--ink-700); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .litem .lt { flex: 1; font-size: 13.5px; font-weight: 700; color: var(--slate-200); }
+  .litem .ls { font-size: 11px; color: var(--slate-500); font-weight: 500; margin-top: 1px; }
+  .litem .larrow { color: var(--slate-500); }
+
+  /* ───── CREATE DEAL ───── */
+  .summary-card {
+    background: linear-gradient(150deg, #34373D, #232528);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 18px; padding: 18px; margin: 4px 0 18px;
+  }
+  .summary-card .sl { font-size: 12px; color: var(--slate-400); margin-bottom: 6px; }
+  .summary-card .sv { font-size: 24px; font-weight: 800; color: #fff; }
+  .summary-card .sv span { font-size: 14px; color: var(--slate-400); }
+  .summary-card .snote { font-size: 11px; color: var(--slate-400); margin-top: 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
+
+  .page-title { font-size: 12.5px; color: var(--slate-400); margin-bottom: 18px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="phone-inner">
+    <div class="notch"></div>
+
+    <!-- ═══ LOGIN ═══ -->
+    <div class="screen active" id="s-login">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="login">
+        <div class="brand">
+          <span class="logo-mark">
+            <svg width="72" height="72" viewBox="0 0 100 100">
+              <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F2F3F4"/><stop offset="48%" stop-color="#9DA2AA"/><stop offset="100%" stop-color="#CBCFD4"/>
+              </linearGradient></defs>
+              <path d="M50 4 L90 26 V62 C90 79 72 91 50 96 C28 91 10 79 10 62 V26 Z" fill="url(#lg)"/>
+              <circle cx="50" cy="21" r="5.5" fill="#1A1B1E" opacity="0.55"/>
+              <rect x="41" y="45" width="18" height="18" rx="2" fill="#1A1B1E" opacity="0.55" transform="rotate(45 50 54)"/>
+            </svg>
+          </span>
+          <h1>عربون</h1>
+          <p>ثقتك محفوظة</p>
+        </div>
+        <div class="field"><label>رقم الجوال</label><input type="tel" placeholder="05XXXXXXXX"></div>
+        <div class="field"><label>كلمة المرور</label><input type="password" placeholder="••••••••"></div>
+        <button class="btn btn-pri" onclick="go('s-home')" style="margin-top:4px;">تسجيل الدخول</button>
+        <div style="text-align:center;margin-top:15px;"><span style="font-size:12.5px;color:var(--slate-400);font-weight:600;">نسيت كلمة المرور؟</span></div>
+        <div class="divider"><div class="ln"></div><span>أو</span><div class="ln"></div></div>
+        <button class="btn btn-sec" onclick="go('s-home')">الدخول عبر نفاذ الوطني</button>
+        <div class="login-foot">ليس لديك حساب؟ <b onclick="go('s-home')">إنشاء حساب جديد</b></div>
+      </div>
+    </div>
+
+    <!-- ═══ HOME ═══ -->
+    <div class="screen" id="s-home">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll with-nav">
+        <div class="header">
+          <div class="logo-row">
+            <span class="logo-mark"><svg width="32" height="32" viewBox="0 0 100 100">
+              <defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F2F3F4"/><stop offset="48%" stop-color="#9DA2AA"/><stop offset="100%" stop-color="#CBCFD4"/></linearGradient></defs>
+              <path d="M50 4 L90 26 V62 C90 79 72 91 50 96 C28 91 10 79 10 62 V26 Z" fill="url(#hg)"/>
+              <circle cx="50" cy="21" r="5.5" fill="#1A1B1E" opacity="0.55"/>
+              <rect x="41" y="45" width="18" height="18" rx="2" fill="#1A1B1E" opacity="0.55" transform="rotate(45 50 54)"/>
+            </svg></span>
+            <span class="ttl">عربون</span>
+          </div>
+          <div class="icon-btn" onclick="go('s-notif')">🔔<span class="badge"></span></div>
+        </div>
+
+        <div class="balance">
+          <div class="lbl">🛡️ الرصيد المحجوز</div>
+          <div class="amt">450,000<span>ر.س</span></div>
+          <div class="stats">
+            <div class="stat"><div class="n">3</div><div class="l">صفقات نشطة</div></div>
+            <div class="stat"><div class="n">12</div><div class="l">صفقات مكتملة</div></div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <div class="qa" onclick="go('s-create')"><div class="qa-ic">➕</div><span>صفقة جديدة</span></div>
+          <div class="qa" onclick="nav('s-market','سوق التنازلات')"><div class="qa-ic">🔁</div><span>سوق التنازلات</span></div>
+          <div class="qa" onclick="nav('s-templates','النماذج')"><div class="qa-ic">📄</div><span>النماذج</span></div>
+        </div>
+
+        <div class="sec"><h3>آخر الصفقات</h3><a onclick="nav('s-deals','الصفقات')">عرض الكل</a></div>
+
+        <div class="deal" onclick="go('s-detail')">
+          <div class="deal-top">
+            <div class="deal-ic">🏠</div>
+            <div class="deal-meta"><div class="t">عقار سكني - حي النرجس</div><div class="s">الرياض</div></div>
+            <div class="deal-amt">100,000</div>
+          </div>
+          <div class="prog"><div class="seg done"></div><div class="seg done"></div><div class="seg"></div><div class="seg"></div></div>
+          <span class="pill pending">⏳ في انتظار الشروط</span>
+        </div>
+
+        <div class="deal" onclick="go('s-detail')">
+          <div class="deal-top">
+            <div class="deal-ic">🚗</div>
+            <div class="deal-meta"><div class="t">سيارة لكزس ES 2023</div><div class="s">جدة</div></div>
+            <div class="deal-amt">25,000</div>
+          </div>
+          <div class="prog"><div class="seg done"></div><div class="seg done"></div><div class="seg done"></div><div class="seg"></div></div>
+          <span class="pill success">✓ بانتظار التأكيد النهائي</span>
+        </div>
+
+        <div class="deal" onclick="go('s-detail')">
+          <div class="deal-top">
+            <div class="deal-ic">🏢</div>
+            <div class="deal-meta"><div class="t">أرض تجارية - شمال الرياض</div><div class="s">الرياض</div></div>
+            <div class="deal-amt">250,000</div>
+          </div>
+          <div class="prog"><div class="seg done"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div></div>
+          <span class="pill pending">⏳ تم الدفع</span>
+        </div>
+      </div>
+      <div class="nav" data-nav></div>
+    </div>
+
+    <!-- ═══ DEALS ═══ -->
+    <div class="screen" id="s-deals">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll with-nav">
+        <div class="header"><span class="ttl">الصفقات</span><div class="icon-btn">🔍</div></div>
+        <div class="filters">
+          <div class="chip on">الكل</div><div class="chip">نشطة</div><div class="chip">مكتملة</div><div class="chip">ملغاة</div>
+        </div>
+
+        <div class="deal" onclick="go('s-detail')">
+          <div class="deal-top"><div class="deal-ic">🏠</div><div class="deal-meta"><div class="t">عقار سكني - حي النرجس</div><div class="s">الرياض · #AR-2941</div></div><div class="deal-amt">100,000</div></div>
+          <div class="prog"><div class="seg done"></div><div class="seg done"></div><div class="seg"></div><div class="seg"></div></div>
+          <span class="pill pending">⏳ في انتظار الشروط</span>
+        </div>
+        <div class="deal" onclick="go('s-detail')">
+          <div class="deal-top"><div class="deal-ic">🚗</div><div class="deal-meta"><div class="t">سيارة لكزس ES 2023</div><div class="s">جدة · #AR-2938</div></div><div class="deal-amt">25,000</div></div>
+          <div class="prog"><div class="seg done"></div><div class="seg done"></div><div class="seg done"></div><div class="seg"></div></div>
+          <span class="pill success">✓ بانتظار التأكيد</span>
+        </div>
+        <div class="deal" onclick="go('s-detail')">
+          <div class="deal-top"><div class="deal-ic">🏢</div><div class="deal-meta"><div class="t">أرض تجارية - شمال الرياض</div><div class="s">الرياض · #AR-2935</div></div><div class="deal-amt">250,000</div></div>
+          <div class="prog"><div class="seg done"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div></div>
+          <span class="pill pending">⏳ تم الدفع</span>
+        </div>
+        <div class="deal" onclick="go('s-detail')">
+          <div class="deal-top"><div class="deal-ic">🏪</div><div class="deal-meta"><div class="t">محل تجاري - حي العليا</div><div class="s">الرياض · #AR-2901</div></div><div class="deal-amt">80,000</div></div>
+          <div class="prog"><div class="seg done"></div><div class="seg done"></div><div class="seg done"></div><div class="seg done"></div></div>
+          <span class="pill success">✓ مكتملة</span>
+        </div>
+        <div class="deal" onclick="go('s-detail')">
+          <div class="deal-top"><div class="deal-ic">🚗</div><div class="deal-meta"><div class="t">سيارة جمس يوكن 2022</div><div class="s">الدمام · #AR-2890</div></div><div class="deal-amt">18,000</div></div>
+          <div class="prog"><div class="seg done"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div></div>
+          <span class="pill danger">✕ ملغاة</span>
+        </div>
+      </div>
+      <div class="nav" data-nav></div>
+    </div>
+
+    <!-- ═══ DETAIL ═══ -->
+    <div class="screen" id="s-detail">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll">
+        <div class="header">
+          <div class="icon-btn back-btn" onclick="back()">→</div>
+          <span class="ttl" style="font-size:16px;">تفاصيل الصفقة</span>
+          <div class="icon-btn">⋯</div>
+        </div>
+        <div class="detail-hero">
+          <div class="ic">🏠</div>
+          <div class="a">100,000<span> ر.س</span></div>
+          <div class="s">عقار سكني - حي النرجس، الرياض</div>
+        </div>
+        <div class="stepper">
+          <div class="step done"><div class="c">✓</div><span>محجوز</span></div>
+          <div class="step done"><div class="c">✓</div><span>تم الدفع</span></div>
+          <div class="step cur"><div class="c">3</div><span>تم التأكيد</span></div>
+          <div class="step"><div class="c">4</div><span>مكتملة</span></div>
+        </div>
+        <div style="text-align:center;margin-bottom:18px;"><span class="pill pending">⏳ في انتظار اكتمال الشروط</span></div>
+        <div class="infobox">
+          <div class="irow"><span class="k">رقم الصفقة</span><span class="v">#AR-2941</span></div>
+          <div class="irow"><span class="k">الطرف الثاني</span><span class="v">عبدالله العتيبي</span></div>
+          <div class="irow"><span class="k">تاريخ الإنشاء</span><span class="v">12 محرم 1447</span></div>
+          <div class="irow"><span class="k">مدة الحجز</span><span class="v">30 يوماً</span></div>
+        </div>
+        <div class="infobox">
+          <div class="irow"><span class="k">قيمة العربون</span><span class="v">100,000 ر.س</span></div>
+          <div class="irow"><span class="k">رسوم المنصة (2٪)</span><span class="v">2,000 ر.س</span></div>
+          <div class="irow"><span class="k">صافي المبلغ للبائع</span><span class="v">98,000 ر.س</span></div>
+        </div>
+        <button class="btn btn-pri" style="margin-bottom:10px;" onclick="go('s-contract')">عرض العقد الرقمي</button>
+        <button class="btn btn-danger" onclick="go('s-dispute')">فتح نزاع</button>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ CONTRACT ═══ -->
+    <div class="screen" id="s-contract">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll">
+        <div class="header">
+          <div class="icon-btn back-btn" onclick="back()">→</div>
+          <span class="ttl" style="font-size:16px;">العقد الرقمي</span>
+          <div class="icon-btn">📤</div>
+        </div>
+        <div class="infobox" style="padding:20px 18px;">
+          <div style="text-align:center;margin-bottom:18px;">
+            <div style="font-size:13px;color:var(--slate-400);">عقد عربون عقاري موثق</div>
+            <div style="font-size:11px;color:var(--slate-500);margin-top:4px;">#AR-2941 · موثّق إلكترونياً</div>
+          </div>
+          <div class="irow"><span class="k">البائع</span><span class="v">عبدالله العتيبي</span></div>
+          <div class="irow"><span class="k">المشتري</span><span class="v">عبدالرحمن الأحمد</span></div>
+          <div class="irow"><span class="k">العقار</span><span class="v">شقة - حي النرجس</span></div>
+          <div class="irow"><span class="k">قيمة الصفقة</span><span class="v">2,000,000 ر.س</span></div>
+          <div class="irow"><span class="k">العربون</span><span class="v">100,000 ر.س</span></div>
+        </div>
+        <div class="infobox" style="padding:16px 18px;">
+          <div style="font-size:13px;font-weight:700;color:var(--slate-200);margin-bottom:10px;">شروط الاسترجاع والمصادرة</div>
+          <p style="font-size:12px;color:var(--slate-400);line-height:1.8;">يُسترجع العربون كاملاً للمشتري إذا تراجع البائع. ويُصادر لصالح البائع إذا تراجع المشتري دون سبب نظامي خلال مدة الحجز (30 يوماً).</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:6px 0 16px;font-size:11.5px;color:var(--success);font-weight:700;">
+          🔏 موثّق بطابع زمني · مقبول في المحاكم
+        </div>
+        <button class="btn btn-pri" onclick="back()">العودة للصفقة</button>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ DISPUTE ═══ -->
+    <div class="screen" id="s-dispute">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll">
+        <div class="header">
+          <div class="icon-btn back-btn" onclick="back()">→</div>
+          <span class="ttl" style="font-size:16px;">فتح نزاع</span>
+          <div style="width:40px;"></div>
+        </div>
+        <div class="page-title">سيتولى محكّم معتمد دراسة الحالة وإصدار قرار خلال 48 ساعة. سيتم تجميد المبلغ حتى صدور القرار.</div>
+        <div class="field"><label>سبب النزاع</label>
+          <div class="pills-sel" style="flex-direction:column;gap:9px;">
+            <div class="psel" style="text-align:right;">تراجع الطرف الآخر عن الصفقة</div>
+            <div class="psel on" style="text-align:right;">عدم الالتزام بالشروط المتفق عليها</div>
+            <div class="psel" style="text-align:right;">سبب آخر</div>
+          </div>
+        </div>
+        <div class="field"><label>تفاصيل إضافية</label><input type="text" placeholder="اشرح المشكلة باختصار..." style="padding-bottom:40px;"></div>
+        <div class="field"><label>إرفاق مستندات</label>
+          <div class="infobox" style="text-align:center;padding:22px;cursor:pointer;">
+            <div style="font-size:24px;margin-bottom:6px;">📎</div>
+            <div style="font-size:12px;color:var(--slate-400);">اضغط لإرفاق صور أو مستندات داعمة</div>
+          </div>
+        </div>
+        <button class="btn btn-pri" style="margin-bottom:10px;" onclick="back()">تقديم النزاع</button>
+        <button class="btn btn-sec" onclick="back()">إلغاء</button>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ CREATE DEAL ═══ -->
+    <div class="screen" id="s-create">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll">
+        <div class="header">
+          <div class="icon-btn back-btn" onclick="back()">→</div>
+          <span class="ttl" style="font-size:16px;">صفقة جديدة</span>
+          <div style="width:40px;"></div>
+        </div>
+        <div class="field"><label>نوع الصفقة</label>
+          <div class="pills-sel">
+            <div class="psel on"><span class="psel-ic">🏠</span>عقار</div>
+            <div class="psel"><span class="psel-ic">🚗</span>سيارة</div>
+            <div class="psel"><span class="psel-ic">🏪</span>تجاري</div>
+          </div>
+        </div>
+        <div class="field"><label>عنوان الصفقة</label><input type="text" placeholder="مثال: شقة - حي النرجس"></div>
+        <div class="field"><label>قيمة الصفقة الكاملة</label><input type="text" placeholder="2,000,000 ر.س"></div>
+        <div class="field"><label>قيمة العربون</label><input type="text" placeholder="100,000 ر.س"></div>
+        <div class="field"><label>رقم جوال الطرف الثاني</label><input type="tel" placeholder="05XXXXXXXX"></div>
+
+        <div class="summary-card">
+          <div class="sl">قيمة العربون المحجوز</div>
+          <div class="sv">100,000<span> ر.س</span></div>
+          <div class="snote">رسوم المنصة 2٪ (2,000 ر.س) · صافي للبائع 98,000 ر.س</div>
+        </div>
+        <button class="btn btn-pri" onclick="go('s-detail')">إنشاء الصفقة وحفظ العربون</button>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ MARKET ═══ -->
+    <div class="screen" id="s-market">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll with-nav">
+        <div class="header"><span class="ttl">سوق التنازلات</span><div class="icon-btn">🔍</div></div>
+        <div class="filters"><div class="chip on">الكل</div><div class="chip">عقار</div><div class="chip">سيارات</div><div class="chip">تجاري</div></div>
+
+        <div class="mcard">
+          <div class="mhead"><span class="mtag">عقار</span><span class="mprice">120,000 ر.س</span></div>
+          <div class="mtitle">شقة سكنية - حي الياسمين</div>
+          <div class="mloc">📍 الرياض · متاح للتنازل</div>
+          <div class="mfoot"><span class="mdep">عربون محجوز: <b>6,000 ر.س</b></span><span class="mcta">عرض التفاصيل</span></div>
+        </div>
+        <div class="mcard">
+          <div class="mhead"><span class="mtag">سيارات</span><span class="mprice">85,000 ر.س</span></div>
+          <div class="mtitle">تويوتا كامري 2024</div>
+          <div class="mloc">📍 جدة · متاح للتنازل</div>
+          <div class="mfoot"><span class="mdep">عربون محجوز: <b>4,250 ر.س</b></span><span class="mcta">عرض التفاصيل</span></div>
+        </div>
+        <div class="mcard">
+          <div class="mhead"><span class="mtag">تجاري</span><span class="mprice">310,000 ر.س</span></div>
+          <div class="mtitle">محل تجاري - طريق الملك فهد</div>
+          <div class="mloc">📍 الرياض · متاح للتنازل</div>
+          <div class="mfoot"><span class="mdep">عربون محجوز: <b>15,500 ر.س</b></span><span class="mcta">عرض التفاصيل</span></div>
+        </div>
+        <div class="mcard">
+          <div class="mhead"><span class="mtag">عقار</span><span class="mprice">95,000 ر.س</span></div>
+          <div class="mtitle">أرض سكنية - حي العارض</div>
+          <div class="mloc">📍 الرياض · متاح للتنازل</div>
+          <div class="mfoot"><span class="mdep">عربون محجوز: <b>4,750 ر.س</b></span><span class="mcta">عرض التفاصيل</span></div>
+        </div>
+      </div>
+      <div class="nav" data-nav></div>
+    </div>
+
+    <!-- ═══ TEMPLATES ═══ -->
+    <div class="screen" id="s-templates">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll with-nav">
+        <div class="header"><span class="ttl">قوالب العقود</span></div>
+        <div class="page-title">اختر القالب المناسب لنوع صفقتك وابدأ إنشاء عقد رقمي موثق</div>
+        <div class="tcard" onclick="go('s-create')"><div class="ti">🏠</div><div style="flex:1;"><div class="tt">عقد عربون عقاري</div><div class="td">للشقق، الفلل، والأراضي السكنية والتجارية</div></div><span class="tarrow">‹</span></div>
+        <div class="tcard" onclick="go('s-create')"><div class="ti">🚗</div><div style="flex:1;"><div class="tt">عقد عربون سيارة</div><div class="td">للسيارات الجديدة والمستعملة</div></div><span class="tarrow">‹</span></div>
+        <div class="tcard" onclick="go('s-create')"><div class="ti">🏪</div><div style="flex:1;"><div class="tt">محل ومنشأة تجارية</div><div class="td">عقود الإيجار والبيع التجاري</div></div><span class="tarrow">‹</span></div>
+        <div class="tcard" onclick="go('s-create')"><div class="ti">📦</div><div style="flex:1;"><div class="tt">صفقة مخصصة</div><div class="td">أنشئ عقداً يلائم أي نوع صفقة</div></div><span class="tarrow">‹</span></div>
+      </div>
+      <div class="nav" data-nav></div>
+    </div>
+
+    <!-- ═══ NOTIF ═══ -->
+    <div class="screen" id="s-notif">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll">
+        <div class="header"><div class="icon-btn back-btn" onclick="back()">→</div><span class="ttl" style="font-size:16px;">الإشعارات</span><div style="width:40px;"></div></div>
+        <div class="litem" style="cursor:default;"><div class="li" style="background:var(--success-bg);">💸</div><div style="flex:1;"><div class="lt">تم دفع العربون</div><div class="ls">صفقة سيارة لكزس ES — 25,000 ر.س</div></div><span class="ls">قبل ساعة</span></div>
+        <div class="litem" style="cursor:default;"><div class="li" style="background:var(--success-bg);">✓</div><div style="flex:1;"><div class="lt">اكتملت الصفقة</div><div class="ls">محل تجاري - حي العليا — 80,000 ر.س</div></div><span class="ls">أمس</span></div>
+        <div class="litem" style="cursor:default;"><div class="li" style="background:var(--warning-bg);">⏳</div><div style="flex:1;"><div class="lt">بانتظار تأكيدك</div><div class="ls">أرض تجارية - شمال الرياض</div></div><span class="ls">أمس</span></div>
+        <div class="litem" style="cursor:default;"><div class="li" style="background:var(--danger-bg);">✕</div><div style="flex:1;"><div class="lt">أُلغيت الصفقة</div><div class="ls">سيارة جمس يوكن — استُرجع العربون</div></div><span class="ls">قبل 3 أيام</span></div>
+        <div class="litem" style="cursor:default;"><div class="li">🔔</div><div style="flex:1;"><div class="lt">تذكير: مدة الحجز</div><div class="ls">تبقّى 12 يوماً على صفقة حي النرجس</div></div><span class="ls">قبل 3 أيام</span></div>
+      </div>
+    </div>
+
+    <!-- ═══ PROFILE ═══ -->
+    <div class="screen" id="s-profile">
+      <div class="status-bar"><span>9:41</span><div class="icons"><span>●●●</span><span>📶</span><span>🔋</span></div></div>
+      <div class="scroll with-nav">
+        <div class="header"><span class="ttl">الملف الشخصي</span><div class="icon-btn">⚙️</div></div>
+        <div class="phead">
+          <div class="avatar">ع.أ</div>
+          <div class="pname">عبدالرحمن الأحمد</div>
+          <div class="vbadge">✓ هوية موثقة</div>
+        </div>
+        <div class="litem"><div class="li">🪪</div><div class="lt">التحقق من الهوية<div class="ls">موثقة عبر نفاذ الوطني</div></div><span class="larrow">‹</span></div>
+        <div class="litem"><div class="li">💳</div><div class="lt">وسائل الدفع<div class="ls">بطاقتان محفوظتان</div></div><span class="larrow">‹</span></div>
+        <div class="litem"><div class="li">📜</div><div class="lt">سجل العمليات<div class="ls">15 عملية موثقة</div></div><span class="larrow">‹</span></div>
+        <div class="litem"><div class="li">🔔</div><div class="lt">إعدادات الإشعارات</div><span class="larrow">‹</span></div>
+        <div class="litem"><div class="li">🛟</div><div class="lt">الدعم والمساعدة</div><span class="larrow">‹</span></div>
+        <div class="litem" style="margin-top:14px;" onclick="go('s-login')"><div class="li" style="background:var(--danger-bg);">🚪</div><div class="lt" style="color:var(--danger);">تسجيل الخروج</div></div>
+      </div>
+      <div class="nav" data-nav></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const navConfig = [
+    { id: 's-home', label: 'الرئيسية', icon: '<path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/>' },
+    { id: 's-deals', label: 'الصفقات', icon: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/>' },
+    { id: 's-market', label: 'سوق التنازلات', icon: '<path d="M7 16V4M7 4l-3 3M7 4l3 3M17 8v12M17 20l3-3M17 20l-3-3"/>' },
+    { id: 's-templates', label: 'النماذج', icon: '<path d="M14 3v4a1 1 0 001 1h4M6 3h7l5 5v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2z"/>' },
+    { id: 's-profile', label: 'الملف الشخصي', icon: '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/>' },
+  ];
+
+  let history = ['s-login'];
+
+  function renderNavs() {
+    document.querySelectorAll('[data-nav]').forEach(navEl => {
+      const current = navEl.closest('.screen').id;
+      navEl.innerHTML = navConfig.map(n => `
+        <div class="nav-item ${n.id === current ? 'active' : ''}" onclick="nav('${n.id}','${n.label}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${n.icon}</svg>
+          <span>${n.label}</span>
+          <div class="nav-dot"></div>
+        </div>`).join('');
+    });
+  }
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const sc = document.querySelector('#' + id + ' .scroll');
+    if (sc) sc.scrollTop = 0;
+  }
+
+  function go(id) {
+    history.push(id);
+    show(id);
+  }
+
+  function nav(id) {
+    history = ['s-login', id];
+    show(id);
+  }
+
+  function back() {
+    if (history.length > 1) { history.pop(); show(history[history.length - 1]); }
+  }
+
+  renderNavs();
+</script>
+</body>
+</html>
