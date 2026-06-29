@@ -15,9 +15,9 @@ import { Store, ArrowLeft, Eye, XCircle, Tag, PlusCircle } from "lucide-react";
 
 const typeIcons: Record<string, string> = {
   real_estate: "🏠",
-  vehicle: "🚗",
-  business: "🏢",
-  other: "📄",
+  vehicle:     "🚗",
+  business:    "🏢",
+  other:       "📄",
 };
 
 export default function MyListings() {
@@ -106,7 +106,7 @@ export default function MyListings() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <p className="font-semibold">{deal.title}</p>
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800 border border-green-200">معروضة</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-800 border border-emerald-200">معروضة</span>
                       </div>
                       <div className="flex gap-4 mt-2 text-sm">
                         <span>العربون: <span className="font-bold">{formatAmount(deal.amount)}</span></span>
@@ -119,7 +119,7 @@ export default function MyListings() {
                       size="sm"
                       onClick={() => handleUnlist(deal.id)}
                       disabled={unlistForTransfer.isPending}
-                      className="gap-1 border-red-300 text-red-700 hover:bg-red-50 shrink-0"
+                      className="gap-1 border-destructive/30 text-destructive hover:bg-destructive/5 shrink-0"
                     >
                       <XCircle className="w-3.5 h-3.5" />
                       إلغاء العرض
@@ -149,7 +149,7 @@ export default function MyListings() {
           </CardContent>
         </Card>
 
-        {/* List Dialog placeholder - shown from deal detail */}
+        {/* List Dialog */}
         <Dialog open={!!listingDeal} onOpenChange={(open) => { if (!open) { setListingDeal(null); setListPrice(""); setListDesc(""); } }}>
           <DialogContent>
             <DialogHeader>
@@ -157,7 +157,7 @@ export default function MyListings() {
             </DialogHeader>
             <div className="space-y-4 py-2">
               <p className="text-sm text-muted-foreground">
-                بعرض الصفقة في سوق التنازلات ، مشتريين آخرون يستطيعون رؤية الصفقة وتقديم طلب تنازل.
+                بعرض الصفقة في سوق التنازلات، مشتريون آخرون يستطيعون رؤية الصفقة وتقديم طلب تنازل.
               </p>
               <div>
                 <Label>سعر التنازل (ر.س)</Label>

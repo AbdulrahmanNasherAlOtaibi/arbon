@@ -45,14 +45,14 @@ const eventIcons: Record<string, React.ElementType> = {
 };
 
 const eventColors: Record<string, string> = {
-  created: "text-blue-600 bg-blue-50",
-  completed: "text-teal-600 bg-teal-50",
-  cancelled: "text-gray-500 bg-gray-50",
-  disputed: "text-orange-600 bg-orange-50",
-  buyer_signed: "text-green-600 bg-green-50",
-  seller_signed: "text-green-600 bg-green-50",
-  forfeited: "text-red-600 bg-red-50",
-  default: "text-primary bg-primary/8",
+  created:      "text-primary bg-primary/8",
+  completed:    "text-emerald-600 bg-emerald-50",
+  cancelled:    "text-muted-foreground bg-muted",
+  disputed:     "text-amber-600 bg-amber-50",
+  buyer_signed: "text-emerald-600 bg-emerald-50",
+  seller_signed:"text-emerald-600 bg-emerald-50",
+  forfeited:    "text-red-600 bg-red-50",
+  default:      "text-primary bg-primary/8",
 };
 
 export default function Dashboard() {
@@ -87,8 +87,8 @@ export default function Dashboard() {
           <>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard title="إجمالي الصفقات" value={summary.totalDeals} icon={Briefcase} sub={`${summary.dealsAsbuyer} كمشتري · ${summary.dealsAsSeller} كبائع`} />
-              <StatCard title="صفقات نشطة" value={summary.activeDeals} icon={TrendingUp} color="text-green-700" sub="في حساب الضمان" />
-              <StatCard title="صفقات مكتملة" value={summary.completedDeals} icon={CheckCircle} color="text-teal-700" />
+              <StatCard title="صفقات نشطة" value={summary.activeDeals} icon={TrendingUp} color="text-emerald-700" sub="في حساب الضمان" />
+              <StatCard title="صفقات مكتملة" value={summary.completedDeals} icon={CheckCircle} color="text-emerald-700" />
               <StatCard title="بانتظار التوقيع" value={summary.pendingSignature} icon={Clock} color="text-amber-700" />
             </div>
 
@@ -108,15 +108,15 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border bg-teal-50 shadow-sm">
+              <Card className="border bg-emerald-50 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-teal-100">
-                      <CheckCircle className="w-6 h-6 text-teal-700" />
+                    <div className="p-3 rounded-xl bg-emerald-100">
+                      <CheckCircle className="w-6 h-6 text-emerald-700" />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">إجمالي المبالغ المكتملة</p>
-                      <p className="text-3xl font-bold text-teal-700 mt-0.5">{formatAmount(summary.totalAmountCompleted)}</p>
+                      <p className="text-3xl font-bold text-emerald-700 mt-0.5">{formatAmount(summary.totalAmountCompleted)}</p>
                       <p className="text-xs text-muted-foreground mt-1">تم تحويلها بنجاح</p>
                     </div>
                   </div>
@@ -125,14 +125,14 @@ export default function Dashboard() {
             </div>
 
             {summary.disputedDeals > 0 && (
-              <Card className="border border-orange-200 bg-orange-50 shadow-sm">
+              <Card className="border border-amber-200 bg-amber-50 shadow-sm">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-orange-600 shrink-0" />
-                  <p className="text-sm text-orange-800">
+                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                  <p className="text-sm text-amber-900">
                     لديك <span className="font-bold">{summary.disputedDeals}</span> صفقة متنازع عليها قيد المراجعة. سيتم البت فيها خلال 48 ساعة.
                   </p>
                   <Link href="/deals?status=disputed" className="mr-auto">
-                    <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100 shrink-0">
+                    <Button variant="outline" size="sm" className="text-amber-800 border-amber-300 hover:bg-amber-100 shrink-0">
                       عرض التفاصيل
                     </Button>
                   </Link>

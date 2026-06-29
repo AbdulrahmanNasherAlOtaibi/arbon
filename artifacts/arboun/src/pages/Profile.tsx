@@ -33,7 +33,7 @@ export default function Profile() {
                     <div className="flex items-center gap-2">
                       <h3 className="text-xl font-bold">{user.name}</h3>
                       {user.verified ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800 border border-green-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-800 border border-emerald-200">
                           <CheckCircle className="w-3 h-3" />
                           موثق
                         </span>
@@ -97,12 +97,12 @@ export default function Profile() {
                   <p className="text-xs text-muted-foreground">إجمالي الصفقات</p>
                 </div>
                 <div className="p-4 rounded-xl bg-secondary/50 text-center">
-                  <CheckCircle className="w-5 h-5 text-teal-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-teal-700">{summary.completedDeals}</p>
+                  <CheckCircle className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+                  <p className="text-2xl font-bold text-emerald-700">{summary.completedDeals}</p>
                   <p className="text-xs text-muted-foreground">صفقات مكتملة</p>
                 </div>
                 <div className="p-4 rounded-xl bg-secondary/50 text-center">
-                  <TrendingUp className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                  <TrendingUp className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
                   <p className="text-xl font-bold">{formatAmount(summary.totalAmountCompleted)}</p>
                   <p className="text-xs text-muted-foreground">إجمالي المبالغ المكتملة</p>
                 </div>
@@ -122,9 +122,9 @@ export default function Profile() {
           <CardContent>
             <div className="space-y-3">
               {[
-                { icon: Shield, title: "حساب ضمان مرخص من ساما", desc: "مبلغك محفوظ لدى مزود مدفوعات مرخص تحت إشراف ساما" },
-                { icon: CheckCircle, title: "عقود رقمية ملزمة", desc: "عقودنا موثقة ومعتمدة بتوقيع رقمي قانوني" },
-                { icon: Clock, title: "فض نزاعات خلال 48 ساعة", desc: "لجنة محايدة تبت في النزاعات سريعاً وبعدالة" },
+                { icon: Shield,       title: "حساب ضمان مرخص من ساما",    desc: "مبلغك محفوظ لدى مزود مدفوعات مرخص تحت إشراف ساما" },
+                { icon: CheckCircle,  title: "عقود رقمية ملزمة",           desc: "عقودنا موثقة ومعتمدة بتوقيع رقمي قانوني" },
+                { icon: Clock,        title: "فض نزاعات خلال 48 ساعة",     desc: "لجنة محايدة تبت في النزاعات سريعاً وبعدالة" },
               ].map((item) => (
                 <div key={item.title} className="flex items-start gap-3">
                   <div className="p-2 rounded-lg bg-primary/8 shrink-0">

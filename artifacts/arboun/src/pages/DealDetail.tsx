@@ -148,21 +148,21 @@ export default function DealDetail({ id }: Props) {
   };
 
   const actionColors: Record<string, string> = {
-    complete: "bg-teal-600 hover:bg-teal-700 text-white",
-    cancel: "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
-    forfeit: "bg-red-900 hover:bg-red-800 text-white",
-    list: "bg-indigo-600 hover:bg-indigo-700 text-white",
+    complete: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    cancel:   "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
+    forfeit:  "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
+    list:     "bg-primary hover:bg-primary/90 text-primary-foreground",
   };
 
   const timelineIcons: Record<string, string> = {
-    created: "✦",
-    buyer_signed: "✎",
+    created:       "✦",
+    buyer_signed:  "✎",
     seller_signed: "✎",
-    completed: "✓",
-    cancelled: "✗",
-    disputed: "!",
-    forfeited: "✗",
-    dispute_opened: "!",
+    completed:     "✓",
+    cancelled:     "✗",
+    disputed:      "!",
+    forfeited:     "✗",
+    dispute_opened:"!",
   };
 
   return (
@@ -228,7 +228,7 @@ export default function DealDetail({ id }: Props) {
                 <p className="font-semibold">{deal.buyerName}</p>
                 <div className="flex items-center gap-1.5 mt-2">
                   {deal.buyerSigned
-                    ? <><CheckCircle className="w-3.5 h-3.5 text-green-600" /><span className="text-xs text-green-700">وقّع على العقد</span></>
+                    ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-600" /><span className="text-xs text-emerald-700">وقّع على العقد</span></>
                     : <><Clock className="w-3.5 h-3.5 text-amber-500" /><span className="text-xs text-amber-700">لم يوقع بعد</span></>
                   }
                 </div>
@@ -241,7 +241,7 @@ export default function DealDetail({ id }: Props) {
                 <p className="font-semibold">{deal.sellerName}</p>
                 <div className="flex items-center gap-1.5 mt-2">
                   {deal.sellerSigned
-                    ? <><CheckCircle className="w-3.5 h-3.5 text-green-600" /><span className="text-xs text-green-700">وقّع على العقد</span></>
+                    ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-600" /><span className="text-xs text-emerald-700">وقّع على العقد</span></>
                     : <><Clock className="w-3.5 h-3.5 text-amber-500" /><span className="text-xs text-amber-700">لم يوقع بعد</span></>
                   }
                 </div>
@@ -289,9 +289,9 @@ export default function DealDetail({ id }: Props) {
                 <p className="text-sm leading-relaxed bg-secondary/30 rounded-lg p-3">{contract.terms}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 rounded-lg bg-green-50 border border-green-100">
-                  <p className="text-xs font-semibold text-green-800 mb-1">شروط الاسترجاع</p>
-                  <p className="text-xs text-green-700 leading-relaxed">{contract.refundConditions}</p>
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
+                  <p className="text-xs font-semibold text-emerald-800 mb-1">شروط الاسترجاع</p>
+                  <p className="text-xs text-emerald-700 leading-relaxed">{contract.refundConditions}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-red-50 border border-red-100">
                   <p className="text-xs font-semibold text-red-800 mb-1">شروط المصادرة</p>
@@ -309,7 +309,7 @@ export default function DealDetail({ id }: Props) {
             <CardContent>
               <div className="flex gap-3 flex-wrap">
                 {isActive && (
-                  <Button onClick={() => setActiveAction("complete")} className="gap-1.5 bg-teal-600 hover:bg-teal-700">
+                  <Button onClick={() => setActiveAction("complete")} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
                     <CheckCircle className="w-4 h-4" />
                     إتمام الصفقة
                   </Button>
@@ -319,27 +319,27 @@ export default function DealDetail({ id }: Props) {
                   إلغاء الصفقة
                 </Button>
                 {isBuyer && (
-                  <Button variant="outline" onClick={() => setActiveAction("forfeit")} className="gap-1.5 border-red-900/30 text-red-900 hover:bg-red-50">
+                  <Button variant="outline" onClick={() => setActiveAction("forfeit")} className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/5">
                     <AlertCircle className="w-4 h-4" />
                     الانسحاب
                   </Button>
                 )}
                 {deal.status === "active" && (
                   <Link href={`/deals/${id}/dispute`}>
-                    <Button variant="outline" className="gap-1.5 border-orange-300 text-orange-700 hover:bg-orange-50">
+                    <Button variant="outline" className="gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50">
                       <AlertCircle className="w-4 h-4" />
                       فتح نزاع
                     </Button>
                   </Link>
                 )}
                 {isBuyer && deal.transferStatus !== "listed" && deal.status === "active" && (
-                  <Button variant="outline" onClick={() => { setActiveAction("list"); setListPrice(String(deal.amount ?? "")); }} className="gap-1.5 border-indigo-300 text-indigo-700 hover:bg-indigo-50">
+                  <Button variant="outline" onClick={() => { setActiveAction("list"); setListPrice(String(deal.amount ?? "")); }} className="gap-1.5 border-primary/30 text-primary hover:bg-primary/5">
                     <Tag className="w-4 h-4" />
                     عرض للتنازل
                   </Button>
                 )}
                 {isBuyer && deal.transferStatus === "listed" && (
-                  <Button variant="outline" disabled className="gap-1.5 border-indigo-300 text-indigo-700 bg-indigo-50">
+                  <Button variant="outline" disabled className="gap-1.5 border-primary/30 text-primary bg-primary/5">
                     <Tag className="w-4 h-4" />
                     معروضة للتنازل
                   </Button>
@@ -349,7 +349,7 @@ export default function DealDetail({ id }: Props) {
                     await unlistForTransfer.mutateAsync({ id });
                     await invalidate();
                     await queryClient.invalidateQueries({ queryKey: ["getMyListedDeals"] });
-                  }} disabled={unlistForTransfer.isPending} className="gap-1.5 border-gray-300 text-gray-700 hover:bg-gray-50">
+                  }} disabled={unlistForTransfer.isPending} className="gap-1.5">
                     إلغاء العرض
                   </Button>
                 )}
@@ -405,19 +405,19 @@ export default function DealDetail({ id }: Props) {
                   <p className="text-sm text-muted-foreground">
                     اكتب سعر التنازل والوصف، ثم أكّد لعرض الصفقة في سوق التنازلات. المشترون الجدد يمكنهم طلب التنازل منك.
                   </p>
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
-                    <p className="text-xs font-semibold text-slate-700">تفاصيل العربون الحالية</p>
+                  <div className="p-3 rounded-lg bg-secondary border border-border space-y-2">
+                    <p className="text-xs font-semibold text-foreground">تفاصيل العربون الحالية</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-600">مبلغ العربون المحجوز</span>
-                      <span className="text-sm font-bold text-slate-800">{formatAmount(deal.amount)}</span>
+                      <span className="text-xs text-muted-foreground">مبلغ العربون المحجوز</span>
+                      <span className="text-sm font-bold text-foreground">{formatAmount(deal.amount)}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-600">رسوم المنصة (٢٪)</span>
-                      <span className="text-sm font-medium text-slate-700">{formatAmount(deal.platformFee ?? 0)}</span>
+                      <span className="text-xs text-muted-foreground">رسوم المنصة (٢٪)</span>
+                      <span className="text-sm font-medium text-muted-foreground">{formatAmount(deal.platformFee ?? 0)}</span>
                     </div>
-                    <div className="flex items-center justify-between border-t border-slate-200 pt-2">
-                      <span className="text-xs font-semibold text-slate-700">العربون الصافي</span>
-                      <span className="text-sm font-bold text-slate-800">{formatAmount((deal.amount ?? 0) - (deal.platformFee ?? 0))}</span>
+                    <div className="flex items-center justify-between border-t border-border pt-2">
+                      <span className="text-xs font-semibold text-foreground">العربون الصافي</span>
+                      <span className="text-sm font-bold text-primary">{formatAmount((deal.amount ?? 0) - (deal.platformFee ?? 0))}</span>
                     </div>
                   </div>
                   <div>

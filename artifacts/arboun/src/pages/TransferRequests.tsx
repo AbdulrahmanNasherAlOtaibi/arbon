@@ -37,13 +37,13 @@ export default function TransferRequests() {
   }
 
   const statusBadge: Record<string, string> = {
-    pending: "bg-amber-100 text-amber-800 border-amber-200",
-    approved: "bg-green-100 text-green-800 border-green-200",
-    rejected: "bg-red-100 text-red-800 border-red-200",
+    pending:  "bg-amber-100 text-amber-800 border-amber-200",
+    approved: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    rejected: "bg-red-100 text-red-700 border-red-200",
   };
 
   const statusLabelMap: Record<string, string> = {
-    pending: "قيد المراجعة",
+    pending:  "قيد المراجعة",
     approved: "مقبول",
     rejected: "مرفوض",
   };
@@ -118,7 +118,7 @@ export default function TransferRequests() {
                           size="sm"
                           variant="outline"
                           onClick={() => { setPendingId(req.id); setApprove(false); }}
-                          className="gap-1 border-red-300 text-red-700 hover:bg-red-50"
+                          className="gap-1 border-destructive/30 text-destructive hover:bg-destructive/5"
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           رفض
@@ -126,7 +126,7 @@ export default function TransferRequests() {
                         <Button
                           size="sm"
                           onClick={() => { setPendingId(req.id); setApprove(true); }}
-                          className="gap-1 bg-green-600 hover:bg-green-700"
+                          className="gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
                         >
                           <CheckCircle className="w-3.5 h-3.5" />
                           قبول
@@ -149,7 +149,7 @@ export default function TransferRequests() {
             <div className="py-2">
               {approve ? (
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                   <p className="text-sm text-muted-foreground">
                     بقبولك سيتم نقل الصفقة للمطلب الجديد ويصبح هو المشتري الرسمي. سيتم إنشاء عقد جديد بينه وبين البائع. هذا الإجراء لا يمكن التراجع عنه.
                   </p>
@@ -165,7 +165,7 @@ export default function TransferRequests() {
               <Button
                 onClick={handleConfirm}
                 disabled={approveTransfer.isPending}
-                className={approve ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+                className={approve ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-destructive hover:bg-destructive/90 text-destructive-foreground"}
               >
                 {approveTransfer.isPending ? "جاري..." : approve ? "قبول" : "رفض"}
               </Button>
