@@ -23,10 +23,11 @@ async function buildAll() {
     // - uses native modules and loads them dynamically (e.g. sharp)
     // - use path traversal to read files (e.g. @google-cloud/secret-manager loads sibling .proto files)
     external: [
-      // pino loads transports via dynamic require at runtime; these are only
-      // used when transport: { target } is configured (development only).
-      // In production we write directly to stdout — no worker threads needed.
-      "thread-stream",
+      // pino's lib/transport.js does a top-level `require('thread-stream')` on
+      // import, so it must be bundled — otherwise the runtime image (which ships
+      // no node_modules) crashes with "Cannot find module 'thread-stream'".
+      // The transport *worker* entrypoints below are only resolved when a
+      // transport target is configured (development only), so they stay external.
       "pino-worker",
       "pino-pipeline-worker",
       "pino-file",
