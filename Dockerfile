@@ -25,10 +25,7 @@ RUN pnpm --filter @workspace/api-server run build
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
 FROM node:24-slim AS runtime
 
-# Mirror the builder path so pino's baked-in worker paths resolve correctly.
-# esbuild-plugin-pino embeds absolute paths (e.g. /app/artifacts/api-server/dist/thread-stream-worker.mjs)
-# during build — the runtime dir must match exactly.
-WORKDIR /app/artifacts/api-server
+WORKDIR /app
 
 # Copy only the compiled bundle — no node_modules needed (esbuild bundles them)
 COPY --from=builder /app/artifacts/api-server/dist ./dist
