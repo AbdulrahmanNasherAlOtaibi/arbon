@@ -16,8 +16,8 @@ COPY lib/ ./lib/
 COPY artifacts/api-server/ ./artifacts/api-server/
 
 # Install all workspace dependencies
-# --allow-build=esbuild explicitly permits esbuild's postinstall in pnpm 11+
-RUN pnpm install --frozen-lockfile --allow-build=esbuild,@swc/core,msw,unrs-resolver
+# onlyBuiltDependencies (pnpm-workspace.yaml) + enable-pre-post-scripts (.npmrc) allow esbuild postinstall
+RUN pnpm install --frozen-lockfile
 
 # Build api-server — esbuild bundles everything into artifacts/api-server/dist/
 RUN pnpm --filter @workspace/api-server run build
