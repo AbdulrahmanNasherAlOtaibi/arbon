@@ -6,8 +6,8 @@ WORKDIR /app
 # Enable pnpm via corepack
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy workspace manifests first (maximises layer cache)
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+# Copy workspace manifests + .npmrc first (maximises layer cache)
+COPY .npmrc package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 
 # Copy shared lib packages (workspace:* dependencies of api-server)
 COPY lib/ ./lib/
@@ -15,8 +15,9 @@ COPY lib/ ./lib/
 # Copy api-server source
 COPY artifacts/api-server/ ./artifacts/api-server/
 
-# Install all workspace dependencies (respects lockfile for reproducibility)
-RUN pnpm install --frozen-lockfile
+# Install all workspace dependencies
+# --allow-build=esbuild explicitly permits esbuild's postinstall in pnpm 11+
+RUN pnpm install --frozen-lockfile --allow-build=esbuild,@swc/core,msw,unrs-resolver
 
 # Build api-server — esbuild bundles everything into artifacts/api-server/dist/
 RUN pnpm --filter @workspace/api-server run build
