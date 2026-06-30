@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import * as schema from "../../lib/db/src/schema";
+import * as schema from "@workspace/db/schema";
 import { sql } from "drizzle-orm";
 
 const { Pool } = pg;
@@ -183,9 +183,9 @@ async function seed() {
 
   // Create transfer requests (user 1 (mock) requests some transfers)
   await db.insert(transferRequestsTable).values([
-    { dealId: listedDeals[0].id, requesterId: 1, price: 140000, message: "مهتم بالتنازل عن الفيلا. جاهز للدفع فوراً.", status: "pending" },
-    { dealId: listedDeals[1].id, requesterId: 1, price: 375000, message: "أبحث عن سيارة فاخرة. التنازل مناسب لي.", status: "pending" },
-    { dealId: listedDeals[2].id, requesterId: 1, price: 62000, message: "أرغب في الاستثمار في الدمام. هذا المحل فرصة جيدة.", status: "approved" },
+    { dealId: listedDeals[0].id, fromUserId: 1, toUserId: ahmedId,    price: "140000", message: "مهتم بالتنازل عن الفيلا. جاهز للدفع فوراً.", status: "pending" },
+    { dealId: listedDeals[1].id, fromUserId: 1, toUserId: fatimaId,   price: "375000", message: "أبحث عن سيارة فاخرة. التنازل مناسب لي.", status: "pending" },
+    { dealId: listedDeals[2].id, fromUserId: 1, toUserId: abdullahId, price: "62000",  message: "أرغب في الاستثمار في الدمام. هذا المحل فرصة جيدة.", status: "approved" },
   ]);
 
   console.log("Seed completed!");
