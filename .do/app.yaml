@@ -1,0 +1,25 @@
+spec:
+  name: arboon-api
+  services:
+    - name: arboon-api
+      github:
+        repo: AbdulrahmanNasherAlOtaibi/arbon
+        branch: main
+        deploy_on_push: true
+      source_dir: /
+      build_command: >-
+        corepack enable &&
+        corepack prepare pnpm@latest --activate &&
+        cd artifacts/api-server &&
+        pnpm install &&
+        pnpm build
+      run_command: cd artifacts/api-server && pnpm start
+      http_port: 8080
+      instance_size_slug: basic-xxs
+      instance_count: 1
+      envs:
+        - key: NODE_ENV
+          value: production
+          type: GENERAL
+        - key: SESSION_SECRET
+          type: SECRET
