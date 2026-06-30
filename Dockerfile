@@ -4,7 +4,7 @@ FROM node:24-slim AS builder
 WORKDIR /app
 
 # Enable pnpm via corepack
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.13.1 --activate
 
 # Copy workspace manifests + .npmrc first (maximises layer cache)
 COPY .npmrc package.json pnpm-workspace.yaml pnpm-lock.yaml ./
