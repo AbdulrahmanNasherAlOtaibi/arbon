@@ -1,33 +1,37 @@
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useGetMe, useGetDashboardSummary } from "@workspace/api-client-react";
 import { Layout, InkCard } from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatAmount } from "@/lib/helpers";
+import { useTx } from "@/lib/translations";
 
 export default function Profile() {
   const [, navigate] = useLocation();
   const { data: user, isLoading: userLoading } = useGetMe();
   const { data: summary } = useGetDashboardSummary();
+  const tx = useTx();
 
   const menuItems = [
-    { icon: "🪪", label: "التحقق من الهوية", sub: "موثقة عبر نفاذ الوطني" },
-    { icon: "💳", label: "وسائل الدفع", sub: "بطاقتان محفوظتان" },
-    { icon: "📜", label: "سجل العمليات", sub: `${summary?.totalDeals ?? 0} عملية موثقة` },
-    { icon: "🔔", label: "إعدادات الإشعارات", sub: "" },
-    { icon: "🛟", label: "الدعم والمساعدة", sub: "" },
+    { icon: "🪪", label: tx("profile_verify_id"), sub: "موثقة عبر نفاذ الوطني" },
+    { icon: "💳", label: tx("profile_payment_methods"), sub: "بطاقتان محفوظتان" },
+    { icon: "📜", label: tx("profile_transaction_history"), sub: `${summary?.totalDeals ?? 0} عملية موثقة` },
+    { icon: "🔔", label: tx("profile_notification_settings"), sub: "" },
+    { icon: "🛟", label: tx("profile_support"), sub: "" },
   ];
 
   return (
     <Layout>
       <div className="px-5 py-4">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-extrabold" style={{ color: "#E6E7E9" }}>الملف الشخصي</h2>
-          <button
-            className="w-10 h-10 rounded-[13px] flex items-center justify-center text-lg"
-            style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)" }}
-          >
-            ⚙️
-          </button>
+          <h2 className="text-xl font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{tx("profile_title")}</h2>
+          <Link href="/settings">
+            <button
+              className="w-10 h-10 rounded-[13px] flex items-center justify-center text-lg"
+              style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}
+            >
+              ⚙️
+            </button>
+          </Link>
         </div>
 
         {/* Avatar + Name */}
@@ -41,19 +45,19 @@ export default function Profile() {
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-extrabold mb-3"
               style={{
-                background: "linear-gradient(140deg, #4E5258, #33363B)",
-                border: "2px solid rgba(255,255,255,0.1)",
-                color: "#E6E7E9",
+                background: "linear-gradient(140deg, hsl(var(--secondary)), hsl(var(--muted)))",
+                border: "2px solid hsl(var(--border))",
+                color: "hsl(var(--foreground))",
               }}
             >
               {user.name.charAt(0)}
             </div>
-            <p className="text-lg font-extrabold" style={{ color: "#E6E7E9" }}>{user.name}</p>
+            <p className="text-lg font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{user.name}</p>
             <span
               className="inline-flex items-center gap-1.5 mt-2 text-[11.5px] font-bold px-3 py-1.5 rounded-full"
               style={{ background: "rgba(91,174,126,0.14)", color: "#5BAE7E" }}
             >
-              ✓ هوية موثقة
+              ✓ {tx("profile_verified")}
             </span>
           </div>
         ) : null}
@@ -62,12 +66,12 @@ export default function Profile() {
         {summary && (
           <div className="grid grid-cols-2 gap-3 mb-5">
             <InkCard className="text-center py-4">
-              <p className="text-xl font-extrabold text-white">{summary.totalDeals}</p>
-              <p className="text-[11px] mt-1" style={{ color: "#8A8F98" }}>إجمالي الصفقات</p>
+              <p className="text-xl font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{summary.totalDeals}</p>
+              <p className="text-[11px] mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>{tx("profile_total_deals")}</p>
             </InkCard>
             <InkCard className="text-center py-4">
-              <p className="text-xl font-extrabold text-white">{formatAmount(summary.totalAmountEscrowed)}</p>
-              <p className="text-[11px] mt-1" style={{ color: "#8A8F98" }}>محجوز حالياً</p>
+              <p className="text-xl font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{formatAmount(summary.totalAmountEscrowed)}</p>
+              <p className="text-[11px] mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>{tx("profile_total_escrowed")}</p>
             </InkCard>
           </div>
         )}
@@ -78,21 +82,21 @@ export default function Profile() {
             <button
               key={item.label}
               className="w-full flex items-center gap-3 rounded-[15px] p-4 text-right"
-              style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.04)" }}
+              style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--card-border))" }}
             >
               <div
                 className="w-9 h-9 rounded-[11px] flex items-center justify-center text-base flex-shrink-0"
-                style={{ background: "#3C3F44" }}
+                style={{ background: "hsl(var(--secondary))" }}
               >
                 {item.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13.5px] font-bold" style={{ color: "#C4C8CE" }}>{item.label}</p>
+                <p className="text-[13.5px] font-bold" style={{ color: "hsl(var(--foreground))" }}>{item.label}</p>
                 {item.sub && (
-                  <p className="text-[11px] mt-0.5" style={{ color: "#6B7178" }}>{item.sub}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>{item.sub}</p>
                 )}
               </div>
-              <span className="text-lg" style={{ color: "#6B7178" }}>‹</span>
+              <span className="text-lg" style={{ color: "hsl(var(--muted-foreground))" }}>‹</span>
             </button>
           ))}
         </div>
@@ -100,7 +104,7 @@ export default function Profile() {
         {/* Logout */}
         <button
           className="w-full flex items-center gap-3 rounded-[15px] p-4 text-right mt-2"
-          style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.04)" }}
+          style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--card-border))" }}
           onClick={() => navigate("/")}
         >
           <div
@@ -109,7 +113,7 @@ export default function Profile() {
           >
             🚪
           </div>
-          <p className="text-[13.5px] font-bold" style={{ color: "#CB6060" }}>تسجيل الخروج</p>
+          <p className="text-[13.5px] font-bold" style={{ color: "#CB6060" }}>{tx("profile_logout")}</p>
         </button>
 
         <div className="h-4" />

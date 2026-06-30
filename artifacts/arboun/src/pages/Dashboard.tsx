@@ -26,9 +26,9 @@ export default function Dashboard() {
         {/* Greeting */}
         <div className="flex items-center justify-between py-2">
           <div>
-            <p className="text-[13px] font-semibold" style={{ color: "#8A8F98" }}>
+            <p className="text-[13px] font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
               أهلاً،{" "}
-              <span style={{ color: "#E6E7E9" }}>
+              <span style={{ color: "hsl(var(--foreground))" }}>
                 {me?.name?.split(" ")[0] ?? "مستخدم"}
               </span>
             </p>
@@ -36,7 +36,7 @@ export default function Dashboard() {
           <Link href="/deals/new">
             <button
               className="flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-bold"
-              style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.08)", color: "#E6E7E9" }}
+              style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }}
             >
               <span className="text-base">＋</span>
               صفقة جديدة
@@ -51,8 +51,8 @@ export default function Dashboard() {
           <div
             className="rounded-3xl p-6 relative overflow-hidden"
             style={{
-              background: "linear-gradient(150deg, #3A3D43 0%, #292B2F 55%, #1F2124 100%)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "linear-gradient(150deg, hsl(var(--secondary)) 0%, hsl(var(--muted)) 55%, hsl(var(--background)) 100%)",
+              border: "1px solid hsl(var(--border))",
             }}
           >
             {/* Glow */}
@@ -79,16 +79,16 @@ export default function Dashboard() {
 
             <p
               className="flex items-center gap-2 text-[13px] font-semibold mb-2 relative z-10"
-              style={{ color: "#A8ADB5" }}
+              style={{ color: "hsl(var(--muted-foreground))" }}
             >
               🛡️ الرصيد المحجوز
             </p>
             <p
               className="font-extrabold mb-5 relative z-10"
-              style={{ fontSize: 34, color: "#fff", letterSpacing: -1 }}
+              style={{ fontSize: 34, color: "hsl(var(--foreground))", letterSpacing: -1 }}
             >
               {summary.totalAmountEscrowed.toLocaleString("ar-SA")}
-              <span className="text-lg font-semibold ml-2" style={{ color: "#A8ADB5" }}>ر.س</span>
+              <span className="text-lg font-semibold ml-2" style={{ color: "hsl(var(--muted-foreground))" }}>ر.س</span>
             </p>
             <div className="flex gap-3 relative z-10">
               {[
@@ -98,10 +98,10 @@ export default function Dashboard() {
                 <div
                   key={s.l}
                   className="flex-1 rounded-[14px] p-3"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.04)" }}
+                  style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}
                 >
-                  <p className="text-lg font-extrabold text-white">{s.n}</p>
-                  <p className="text-[11px] mt-1" style={{ color: "#8A8F98" }}>{s.l}</p>
+                  <p className="text-lg font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{s.n}</p>
+                  <p className="text-[11px] mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>{s.l}</p>
                 </div>
               ))}
             </div>
@@ -118,15 +118,15 @@ export default function Dashboard() {
             <Link key={qa.href} href={qa.href}>
               <div
                 className="rounded-[16px] py-4 flex flex-col items-center gap-2"
-                style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)" }}
+                style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--card-border))" }}
               >
                 <div
                   className="w-10 h-10 rounded-[11px] flex items-center justify-center text-lg"
-                  style={{ background: "#3C3F44" }}
+                  style={{ background: "hsl(var(--secondary))" }}
                 >
                   {qa.icon}
                 </div>
-                <span className="text-[11.5px] font-bold" style={{ color: "#A8ADB5" }}>{qa.label}</span>
+                <span className="text-[11.5px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>{qa.label}</span>
               </div>
             </Link>
           ))}
@@ -135,9 +135,9 @@ export default function Dashboard() {
         {/* Recent Deals */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[15px] font-bold" style={{ color: "#E6E7E9" }}>آخر الصفقات</h3>
+            <h3 className="text-[15px] font-bold" style={{ color: "hsl(var(--foreground))" }}>آخر الصفقات</h3>
             <Link href="/deals">
-              <span className="text-xs font-semibold" style={{ color: "#8A8F98" }}>عرض الكل</span>
+              <span className="text-xs font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>عرض الكل</span>
             </Link>
           </div>
 
@@ -177,9 +177,9 @@ export default function Dashboard() {
           ) : (
             <InkCard className="text-center py-10">
               <p className="text-2xl mb-2">🔒</p>
-              <p className="text-sm font-semibold" style={{ color: "#8A8F98" }}>لا يوجد نشاط بعد</p>
+              <p className="text-sm font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>لا يوجد نشاط بعد</p>
               <Link href="/deals/new">
-                <p className="text-xs mt-2 font-bold" style={{ color: "#E6E7E9" }}>أنشئ أول صفقة →</p>
+                <p className="text-xs mt-2 font-bold" style={{ color: "hsl(var(--foreground))" }}>أنشئ أول صفقة →</p>
               </Link>
             </InkCard>
           )}

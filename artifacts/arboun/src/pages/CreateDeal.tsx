@@ -81,11 +81,11 @@ export default function CreateDeal() {
 
   const inputSt: React.CSSProperties = {
     width: "100%",
-    background: "#2B2D31",
-    border: "1px solid rgba(255,255,255,0.07)",
+    background: "hsl(var(--input))",
+    border: "1px solid hsl(var(--border))",
     borderRadius: 14,
     padding: "15px 16px",
-    color: "#E6E7E9",
+    color: "hsl(var(--foreground))",
     fontSize: 14,
     fontFamily: "'Cairo', sans-serif",
     fontWeight: 600,
@@ -99,7 +99,7 @@ export default function CreateDeal() {
       <form onSubmit={handleSubmit} className="px-5 pb-8 space-y-4">
         {/* Deal type */}
         <div>
-          <label className="block text-[12.5px] font-bold mb-3" style={{ color: "#A8ADB5" }}>نوع الصفقة</label>
+          <label className="block text-[12.5px] font-bold mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>نوع الصفقة</label>
           <div className="grid grid-cols-4 gap-2">
             {dealTypes.map((t) => (
               <button
@@ -109,8 +109,8 @@ export default function CreateDeal() {
                 className="flex flex-col items-center gap-1.5 py-3 rounded-[14px] transition-all"
                 style={
                   selectedType === t.value
-                    ? { background: "#E6E7E9", color: "#1A1B1E", border: "1px solid #E6E7E9" }
-                    : { background: "#2B2D31", color: "#A8ADB5", border: "1px solid rgba(255,255,255,0.07)" }
+                    ? { background: "hsl(var(--foreground))", color: "hsl(var(--background))", border: "1px solid hsl(var(--foreground))" }
+                    : { background: "hsl(var(--input))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
                 }
               >
                 <span className="text-xl">{t.icon}</span>
@@ -122,7 +122,7 @@ export default function CreateDeal() {
 
         {/* Title */}
         <div>
-          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>عنوان الصفقة</label>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>عنوان الصفقة</label>
           <input
             style={inputSt}
             placeholder="مثال: شقة - حي النرجس"
@@ -134,7 +134,7 @@ export default function CreateDeal() {
 
         {/* Amount */}
         <div>
-          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>قيمة العربون (ريال)</label>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>قيمة العربون (ريال)</label>
           <input
             style={inputSt}
             type="number"
@@ -147,7 +147,7 @@ export default function CreateDeal() {
 
         {/* Seller phone */}
         <div>
-          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>رقم جوال البائع</label>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>رقم جوال البائع</label>
           <input
             style={inputSt}
             type="tel"
@@ -161,7 +161,7 @@ export default function CreateDeal() {
 
         {/* Description */}
         <div>
-          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>وصف الصفقة</label>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>وصف الصفقة</label>
           <textarea
             style={{ ...inputSt, borderRadius: 14, resize: "none" } as React.CSSProperties}
             placeholder="اكتب تفاصيل الصفقة..."
@@ -175,20 +175,20 @@ export default function CreateDeal() {
         {/* Extra fields by type */}
         {selectedType === "real_estate" && (
           <div>
-            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>عنوان العقار</label>
+            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>عنوان العقار</label>
             <input style={inputSt} placeholder="الحي، المدينة..." value={form.propertyAddress} onChange={(e) => set("propertyAddress", e.target.value)} />
           </div>
         )}
         {selectedType === "vehicle" && (
           <div>
-            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>معلومات المركبة</label>
+            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>معلومات المركبة</label>
             <input style={inputSt} placeholder="الماركة، الموديل، السنة..." value={form.vehicleInfo} onChange={(e) => set("vehicleInfo", e.target.value)} />
           </div>
         )}
 
         {/* Deadline */}
         <div>
-          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>الموعد النهائي</label>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>الموعد النهائي</label>
           <input style={inputSt} type="date" value={form.deadline} onChange={(e) => set("deadline", e.target.value)} />
           {errors.deadline && <p className="text-[11px] mt-1" style={{ color: "#CB6060" }}>{errors.deadline}</p>}
         </div>
@@ -198,18 +198,18 @@ export default function CreateDeal() {
           <div
             className="rounded-[18px] p-5"
             style={{
-              background: "linear-gradient(150deg, #34373D, #232528)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "linear-gradient(150deg, hsl(var(--secondary)), hsl(var(--muted)))",
+              border: "1px solid hsl(var(--border))",
             }}
           >
-            <p className="text-xs font-semibold mb-2" style={{ color: "#8A8F98" }}>قيمة العربون المحجوز</p>
-            <p className="text-2xl font-extrabold mb-2" style={{ color: "#fff" }}>
+            <p className="text-xs font-semibold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>قيمة العربون المحجوز</p>
+            <p className="text-2xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>
               {amount.toLocaleString("ar-SA")}
-              <span className="text-sm font-semibold ml-1" style={{ color: "#8A8F98" }}>ر.س</span>
+              <span className="text-sm font-semibold ml-1" style={{ color: "hsl(var(--muted-foreground))" }}>ر.س</span>
             </p>
             <p
               className="text-[11px] pt-3"
-              style={{ color: "#8A8F98", borderTop: "1px solid rgba(255,255,255,0.08)" }}
+              style={{ color: "hsl(var(--muted-foreground))", borderTop: "1px solid hsl(var(--border))" }}
             >
               رسوم المنصة ٢٪ ({fee.toLocaleString("ar-SA")} ر.س) · صافي للبائع {net.toLocaleString("ar-SA")} ر.س
             </p>

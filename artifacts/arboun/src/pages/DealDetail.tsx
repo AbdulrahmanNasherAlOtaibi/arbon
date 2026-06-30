@@ -142,8 +142,8 @@ export default function DealDetail({ id }: Props) {
       <Layout>
         <PageHeader title="تفاصيل الصفقة" onBack={() => navigate("/deals")} />
         <div className="px-5 text-center py-16">
-          <p className="font-semibold" style={{ color: "#8A8F98" }}>الصفقة غير موجودة</p>
-          <button className="mt-4 text-sm font-bold" style={{ color: "#E6E7E9" }} onClick={() => navigate("/deals")}>
+          <p className="font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>الصفقة غير موجودة</p>
+          <button className="mt-4 text-sm font-bold" style={{ color: "hsl(var(--foreground))" }} onClick={() => navigate("/deals")}>
             العودة للصفقات
           </button>
         </div>
@@ -174,7 +174,7 @@ export default function DealDetail({ id }: Props) {
         right={
           <button
             className="w-10 h-10 rounded-[13px] flex items-center justify-center text-lg"
-            style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)", color: "#A8ADB5" }}
+            style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
           >
             ⋯
           </button>
@@ -186,15 +186,15 @@ export default function DealDetail({ id }: Props) {
         <div className="text-center py-4">
           <div
             className="w-16 h-16 rounded-[18px] flex items-center justify-center text-3xl mx-auto mb-3"
-            style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}
           >
             {typeIcon[deal.type] ?? "📄"}
           </div>
-          <p className="text-3xl font-extrabold" style={{ color: "#fff" }}>
+          <p className="text-3xl font-extrabold" style={{ color: "hsl(var(--foreground))" }}>
             {Number(deal.amount ?? 0).toLocaleString("ar-SA")}
-            <span className="text-lg font-semibold mr-1" style={{ color: "#8A8F98" }}> ر.س</span>
+            <span className="text-lg font-semibold mr-1" style={{ color: "hsl(var(--muted-foreground))" }}> ر.س</span>
           </p>
-          <p className="text-[13px] mt-1.5" style={{ color: "#8A8F98" }}>{deal.title}</p>
+          <p className="text-[13px] mt-1.5" style={{ color: "hsl(var(--muted-foreground))" }}>{deal.title}</p>
         </div>
 
         {/* Stepper */}
@@ -209,7 +209,7 @@ export default function DealDetail({ id }: Props) {
                 {i > 0 && (
                   <div
                     className="absolute top-[15px] right-1/2 w-full h-0.5"
-                    style={{ background: step <= currentStep ? "#C4C8CE" : "#45484E", zIndex: 1 }}
+                    style={{ background: step <= currentStep ? "hsl(var(--foreground))" : "hsl(var(--border))", zIndex: 1 }}
                   />
                 )}
                 {/* circle */}
@@ -217,17 +217,17 @@ export default function DealDetail({ id }: Props) {
                   className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold relative z-10 mb-2"
                   style={
                     isDone
-                      ? { background: "#E6E7E9", color: "#1A1B1E", border: "2px solid #1A1B1E" }
+                      ? { background: "hsl(var(--foreground))", color: "hsl(var(--background))", border: "2px solid hsl(var(--background))" }
                       : isCur
-                      ? { background: "#1A1B1E", color: "#E6E7E9", border: "2px solid #E6E7E9" }
-                      : { background: "#3C3F44", color: "#8A8F98", border: "2px solid #1A1B1E" }
+                      ? { background: "hsl(var(--background))", color: "hsl(var(--foreground))", border: "2px solid hsl(var(--foreground))" }
+                      : { background: "hsl(var(--secondary))", color: "hsl(var(--muted-foreground))", border: "2px solid hsl(var(--background))" }
                   }
                 >
                   {isDone ? "✓" : step}
                 </div>
                 <span
                   className="text-[9.5px] font-semibold text-center"
-                  style={{ color: isDone || isCur ? "#C4C8CE" : "#8A8F98" }}
+                  style={{ color: isDone || isCur ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
                 >
                   {label}
                 </span>
@@ -259,8 +259,8 @@ export default function DealDetail({ id }: Props) {
             <InfoRow label="قيمة العربون" value={formatAmount(deal.amount)} />
             <InfoRow label="رسوم المنصة (٢٪)" value={formatAmount(deal.platformFee ?? 0)} />
             <div className="flex justify-between items-center py-3 text-sm">
-              <span style={{ color: "#8A8F98" }}>صافي المبلغ للبائع</span>
-              <span className="font-extrabold" style={{ color: "#E6E7E9" }}>
+              <span style={{ color: "hsl(var(--muted-foreground))" }}>صافي المبلغ للبائع</span>
+              <span className="font-extrabold" style={{ color: "hsl(var(--foreground))" }}>
                 {formatAmount((deal.amount ?? 0) - (deal.platformFee ?? 0))}
               </span>
             </div>
@@ -284,12 +284,12 @@ export default function DealDetail({ id }: Props) {
               <div className="fixed inset-0 z-50 flex items-end" style={{ background: "rgba(0,0,0,0.7)" }}>
                 <div
                   className="w-full rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto scrollbar-none"
-                  style={{ background: "#212327", border: "1px solid rgba(255,255,255,0.07)" }}
+                  style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
                 >
-                  <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: "#45484E" }} />
+                  <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: "hsl(var(--border))" }} />
                   <div className="text-center mb-5">
-                    <p className="text-sm font-bold" style={{ color: "#E6E7E9" }}>عقد عربون موثق</p>
-                    <p className="text-[11px] mt-1" style={{ color: "#6B7178" }}>#AR-{deal.id} · موثّق إلكترونياً</p>
+                    <p className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>عقد عربون موثق</p>
+                    <p className="text-[11px] mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>#AR-{deal.id} · موثّق إلكترونياً</p>
                   </div>
                   <InkCard className="mb-4">
                     <InfoRow label="البائع" value={deal.sellerName ?? "-"} />
@@ -297,12 +297,12 @@ export default function DealDetail({ id }: Props) {
                     <InfoRow label="العربون" value={formatAmount(deal.amount)} />
                   </InkCard>
                   <InkCard className="mb-4">
-                    <p className="text-[13px] font-bold mb-2" style={{ color: "#C4C8CE" }}>شروط الاسترجاع والمصادرة</p>
-                    <p className="text-[12px] leading-relaxed" style={{ color: "#8A8F98" }}>
+                    <p className="text-[13px] font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>شروط الاسترجاع والمصادرة</p>
+                    <p className="text-[12px] leading-relaxed" style={{ color: "hsl(var(--muted-foreground))" }}>
                       {contract.refundConditions}
                     </p>
-                    <div className="h-px my-3" style={{ background: "#33363B" }} />
-                    <p className="text-[12px] leading-relaxed" style={{ color: "#8A8F98" }}>
+                    <div className="h-px my-3" style={{ background: "hsl(var(--border))" }} />
+                    <p className="text-[12px] leading-relaxed" style={{ color: "hsl(var(--muted-foreground))" }}>
                       {contract.forfeitureConditions}
                     </p>
                   </InkCard>
@@ -359,17 +359,17 @@ export default function DealDetail({ id }: Props) {
         {/* Timeline */}
         {timeline && timeline.length > 0 && (
           <div className="mt-4">
-            <p className="text-[15px] font-bold mb-3" style={{ color: "#E6E7E9" }}>سجل النشاط</p>
+            <p className="text-[15px] font-bold mb-3" style={{ color: "hsl(var(--foreground))" }}>سجل النشاط</p>
             <div className="space-y-2">
               {[...timeline].reverse().map((event) => (
                 <div
                   key={event.id}
                   className="flex items-start gap-3 rounded-[15px] p-4"
-                  style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.04)" }}
+                  style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}
                 >
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                    style={{ background: "#3C3F44", color: "#C4C8CE" }}
+                    style={{ background: "hsl(var(--secondary))", color: "hsl(var(--foreground))" }}
                   >
                     {event.event === "completed" ? "✓"
                       : event.event === "cancelled" || event.event === "forfeited" ? "✕"
@@ -377,11 +377,11 @@ export default function DealDetail({ id }: Props) {
                       : "·"}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold" style={{ color: "#C4C8CE" }}>{event.description}</p>
+                    <p className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>{event.description}</p>
                     {event.actorName && (
-                      <p className="text-[11px] mt-0.5" style={{ color: "#6B7178" }}>{event.actorName}</p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>{event.actorName}</p>
                     )}
-                    <p className="text-[11px] mt-0.5" style={{ color: "#6B7178" }}>{formatDateTime(event.createdAt)}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>{formatDateTime(event.createdAt)}</p>
                   </div>
                 </div>
               ))}
@@ -392,35 +392,35 @@ export default function DealDetail({ id }: Props) {
 
       {/* Action Dialog */}
       <Dialog open={!!activeAction} onOpenChange={(open) => { if (!open) { setActiveAction(null); setReason(""); } }}>
-        <DialogContent style={{ background: "#212327", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <DialogContent style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#E6E7E9" }}>{activeAction ? actionLabels[activeAction] : ""}</DialogTitle>
+            <DialogTitle style={{ color: "hsl(var(--foreground))" }}>{activeAction ? actionLabels[activeAction] : ""}</DialogTitle>
           </DialogHeader>
           <div className="py-2">
             {activeAction === "complete" ? (
-              <p className="text-sm" style={{ color: "#8A8F98" }}>
+              <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
                 بتأكيدك سيتم تحويل مبلغ {formatAmount(deal.amount)} للبائع تلقائياً. هذا الإجراء لا يمكن التراجع عنه.
               </p>
             ) : activeAction === "list" ? (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold mb-1.5" style={{ color: "#A8ADB5" }}>سعر التنازل (ريال)</label>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: "hsl(var(--muted-foreground))" }}>سعر التنازل (ريال)</label>
                   <input
                     type="number"
                     value={listPrice}
                     onChange={(e) => setListPrice(e.target.value)}
                     className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-                    style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.07)", color: "#E6E7E9" }}
+                    style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold mb-1.5" style={{ color: "#A8ADB5" }}>وصف إضافي</label>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: "hsl(var(--muted-foreground))" }}>وصف إضافي</label>
                   <Textarea value={listDesc} onChange={(e) => setListDesc(e.target.value)} rows={2} placeholder="..." />
                 </div>
               </div>
             ) : (
               <>
-                <p className="text-sm mb-3" style={{ color: "#8A8F98" }}>
+                <p className="text-sm mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
                   {activeAction === "cancel"
                     ? "يجب ذكر سبب الإلغاء. سيُعاد مبلغ العربون للمشتري."
                     : "يجب ذكر سبب الانسحاب. سيُصادر مبلغ العربون لصالح البائع."}
@@ -437,7 +437,7 @@ export default function DealDetail({ id }: Props) {
           <DialogFooter className="gap-2">
             <button
               className="px-4 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: "#2B2D31", color: "#A8ADB5", border: "1px solid rgba(255,255,255,0.07)" }}
+              style={{ background: "hsl(var(--input))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}
               onClick={() => { setActiveAction(null); setReason(""); }}
             >
               إلغاء
@@ -445,8 +445,8 @@ export default function DealDetail({ id }: Props) {
             <button
               className="px-5 py-2 rounded-lg text-sm font-bold disabled:opacity-50"
               style={{
-                background: activeAction === "complete" ? "rgba(91,174,126,0.2)" : activeAction === "list" ? "#E6E7E9" : "rgba(203,96,96,0.2)",
-                color: activeAction === "complete" ? "#5BAE7E" : activeAction === "list" ? "#1A1B1E" : "#CB6060",
+                background: activeAction === "complete" ? "rgba(91,174,126,0.2)" : activeAction === "list" ? "hsl(var(--foreground))" : "rgba(203,96,96,0.2)",
+                color: activeAction === "complete" ? "#5BAE7E" : activeAction === "list" ? "hsl(var(--background))" : "#CB6060",
               }}
               onClick={() => {
                 if (activeAction === "complete") setReason("تم الإتمام");

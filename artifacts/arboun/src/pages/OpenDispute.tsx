@@ -64,7 +64,7 @@ export default function OpenDispute({ id }: Props) {
       <Layout>
         <PageHeader title="فتح نزاع" onBack={() => navigate("/deals")} />
         <div className="px-5 text-center py-16">
-          <p className="font-semibold" style={{ color: "#8A8F98" }}>الصفقة غير موجودة</p>
+          <p className="font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>الصفقة غير موجودة</p>
         </div>
       </Layout>
     );
@@ -76,7 +76,7 @@ export default function OpenDispute({ id }: Props) {
 
       <div className="px-5 pb-8 space-y-4">
         {/* Info */}
-        <p className="text-[12.5px] leading-relaxed" style={{ color: "#8A8F98" }}>
+        <p className="text-[12.5px] leading-relaxed" style={{ color: "hsl(var(--muted-foreground))" }}>
           سيتولى محكّم معتمد دراسة الحالة وإصدار قرار خلال 48 ساعة. سيتم تجميد المبلغ حتى صدور القرار.
         </p>
 
@@ -84,13 +84,13 @@ export default function OpenDispute({ id }: Props) {
         <InkCard className="flex items-center gap-3 p-4">
           <div
             className="w-11 h-11 rounded-[13px] flex items-center justify-center text-xl flex-shrink-0"
-            style={{ background: "#3C3F44" }}
+            style={{ background: "hsl(var(--secondary))" }}
           >
             {typeIcon[deal.type] ?? "📄"}
           </div>
           <div className="flex-1">
-            <p className="font-bold text-sm" style={{ color: "#E6E7E9" }}>{deal.title}</p>
-            <p className="text-[11.5px] mt-0.5" style={{ color: "#8A8F98" }}>
+            <p className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>{deal.title}</p>
+            <p className="text-[11.5px] mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>
               {formatAmount(deal.amount)} · {formatDate(deal.deadline)}
             </p>
           </div>
@@ -99,7 +99,7 @@ export default function OpenDispute({ id }: Props) {
 
         {/* Reason selection */}
         <div>
-          <label className="block text-[12.5px] font-bold mb-3" style={{ color: "#A8ADB5" }}>سبب النزاع</label>
+          <label className="block text-[12.5px] font-bold mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>سبب النزاع</label>
           <div className="space-y-2">
             {reasons.map((r, i) => (
               <button
@@ -109,8 +109,8 @@ export default function OpenDispute({ id }: Props) {
                 className="w-full text-right py-4 px-4 rounded-[14px] text-sm font-semibold transition-all"
                 style={
                   selectedReason === i
-                    ? { background: "#E6E7E9", color: "#1A1B1E", border: "1px solid #E6E7E9" }
-                    : { background: "#2B2D31", color: "#A8ADB5", border: "1px solid rgba(255,255,255,0.07)" }
+                    ? { background: "hsl(var(--foreground))", color: "hsl(var(--background))", border: "1px solid hsl(var(--foreground))" }
+                    : { background: "hsl(var(--input))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
                 }
               >
                 {r}
@@ -121,7 +121,7 @@ export default function OpenDispute({ id }: Props) {
 
         {/* Evidence */}
         <div>
-          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "#A8ADB5" }}>تفاصيل إضافية</label>
+          <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>تفاصيل إضافية</label>
           <textarea
             value={evidence}
             onChange={(e) => setEvidence(e.target.value)}
@@ -129,9 +129,9 @@ export default function OpenDispute({ id }: Props) {
             rows={4}
             className="w-full rounded-[14px] px-4 py-4 text-sm font-semibold outline-none resize-none"
             style={{
-              background: "#2B2D31",
-              border: "1px solid rgba(255,255,255,0.07)",
-              color: "#E6E7E9",
+              background: "hsl(var(--input))",
+              border: "1px solid hsl(var(--border))",
+              color: "hsl(var(--foreground))",
             }}
           />
         </div>
@@ -139,7 +139,7 @@ export default function OpenDispute({ id }: Props) {
         {/* Attach */}
         <InkCard className="text-center py-6 cursor-pointer">
           <p className="text-2xl mb-2">📎</p>
-          <p className="text-xs" style={{ color: "#8A8F98" }}>اضغط لإرفاق صور أو مستندات داعمة</p>
+          <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>اضغط لإرفاق صور أو مستندات داعمة</p>
         </InkCard>
 
         {error && (

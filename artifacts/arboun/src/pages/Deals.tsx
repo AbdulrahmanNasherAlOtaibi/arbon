@@ -52,12 +52,12 @@ export default function Deals() {
       <div className="px-5 py-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-extrabold" style={{ color: "#E6E7E9" }}>الصفقات</h2>
+          <h2 className="text-xl font-extrabold" style={{ color: "hsl(var(--foreground))" }}>الصفقات</h2>
           <button
             className="w-10 h-10 rounded-[13px] flex items-center justify-center"
-            style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)" }}
+            style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="#A8ADB5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }}>
               <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
           </button>
@@ -83,7 +83,7 @@ export default function Deals() {
         ) : !deals || deals.length === 0 ? (
           <InkCard className="text-center py-12 mt-4">
             <p className="text-3xl mb-3">📋</p>
-            <p className="font-semibold text-sm" style={{ color: "#8A8F98" }}>لا توجد صفقات</p>
+            <p className="font-semibold text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>لا توجد صفقات</p>
           </InkCard>
         ) : (
           <div>

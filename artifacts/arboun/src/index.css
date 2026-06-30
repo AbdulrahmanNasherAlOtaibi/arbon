@@ -3,7 +3,7 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, [data-theme="dark"] *));
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -67,7 +67,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ─── Dark ink palette — permanently dark app ──────────────────
+/* ─── Dark ink palette ──────────────────
    #0C0D0F ink-950  │  #1A1B1E ink-900 (bg)
    #212327 ink-850  │  #2B2D31 ink-800 (card)
    #33363B ink-750  │  #3C3F44 ink-700 (input/muted)
@@ -159,6 +159,70 @@
   --muted-border:       hsl(var(--muted));
   --accent-border:      hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
+}
+
+/* Light mode override */
+[data-theme="light"] {
+  --button-outline: rgba(0,0,0,.08);
+  --badge-outline:  rgba(0,0,0,.04);
+  --opaque-button-border-intensity: 9;
+  --elevate-1: rgba(0,0,0,.03);
+  --elevate-2: rgba(0,0,0,.06);
+
+  --background: 0 0% 97%;            /* #F7F7F8 */
+  --foreground: 220 10% 18%;        /* #2B2D31 */
+
+  --border: 220 7% 88%;              /* #D8DADE */
+
+  --card: 0 0% 100%;                 /* #FFFFFF */
+  --card-foreground: 220 10% 18%;
+  --card-border: 220 7% 90%;
+
+  --sidebar: 220 7% 96%;            /* #F1F2F4 */
+  --sidebar-foreground: 220 10% 18%;
+  --sidebar-border: 220 7% 88%;
+  --sidebar-primary: 220 10% 18%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 7% 93%;
+  --sidebar-accent-foreground: 220 10% 18%;
+  --sidebar-ring: 220 10% 18%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 10% 18%;
+  --popover-border: 220 7% 88%;
+
+  --primary: 220 10% 18%;           /* #2B2D31 */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 7% 93%;          /* #EDEFF2 */
+  --secondary-foreground: 220 10% 18%;
+
+  --muted: 220 7% 93%;
+  --muted-foreground: 220 5% 45%;     /* #6B7178 */
+
+  --accent: 220 7% 93%;
+  --accent-foreground: 220 10% 18%;
+
+  --destructive: 0 52% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --input: 0 0% 100%;
+  --ring: 220 10% 18%;
+
+  --chart-1: 220 10% 18%;
+  --chart-2: 150 33% 45%;
+  --chart-3: 38 70% 50%;
+  --chart-4: 0 52% 50%;
+  --chart-5: 220 5% 45%;
+
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.08);
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.08);
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow:     0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.12), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.15);
 }
 
 @layer base {

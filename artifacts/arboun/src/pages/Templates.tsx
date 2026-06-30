@@ -32,8 +32,8 @@ export default function Templates() {
     <Layout>
       <div className="px-5 py-4">
         <div className="mb-4">
-          <h2 className="text-xl font-extrabold" style={{ color: "#E6E7E9" }}>قوالب العقود</h2>
-          <p className="text-[12.5px] mt-1 leading-relaxed" style={{ color: "#8A8F98" }}>
+          <h2 className="text-xl font-extrabold" style={{ color: "hsl(var(--foreground))" }}>قوالب العقود</h2>
+          <p className="text-[12.5px] mt-1 leading-relaxed" style={{ color: "hsl(var(--muted-foreground))" }}>
             اختر القالب المناسب لنوع صفقتك وابدأ إنشاء عقد رقمي موثق
           </p>
         </div>
@@ -57,7 +57,7 @@ export default function Templates() {
         ) : !templates || templates.length === 0 ? (
           <InkCard className="text-center py-12">
             <p className="text-3xl mb-2">📄</p>
-            <p className="text-sm" style={{ color: "#8A8F98" }}>لا توجد قوالب</p>
+            <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>لا توجد قوالب</p>
           </InkCard>
         ) : (
           <div className="space-y-3">
@@ -67,20 +67,20 @@ export default function Templates() {
                 <button
                   key={template.id}
                   className="w-full flex items-center gap-4 rounded-[18px] p-4 text-right"
-                  style={{ background: "#2B2D31", border: "1px solid rgba(255,255,255,0.05)" }}
+                  style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--card-border))" }}
                   onClick={() => navigate(`/deals/new?template=${template.id}&type=${template.type}`)}
                 >
                   <div
                     className="w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl flex-shrink-0"
-                    style={{ background: "#3C3F44" }}
+                    style={{ background: "hsl(var(--secondary))" }}
                   >
                     {d.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm" style={{ color: "#E6E7E9" }}>{template.name}</p>
-                    <p className="text-[11.5px] mt-1 leading-snug" style={{ color: "#8A8F98" }}>{template.description}</p>
+                    <p className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>{template.name}</p>
+                    <p className="text-[11.5px] mt-1 leading-snug" style={{ color: "hsl(var(--muted-foreground))" }}>{template.description}</p>
                   </div>
-                  <span className="text-lg flex-shrink-0" style={{ color: "#6B7178" }}>‹</span>
+                  <span className="text-lg flex-shrink-0" style={{ color: "hsl(var(--muted-foreground))" }}>‹</span>
                 </button>
               );
             })}
