@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, disputesTable, dealsTable, timelineTable } from "@workspace/db";
+import * as escrow from "../domain/escrow";
 import {
   GetDealDisputeParams,
   GetDealDisputeResponse,
@@ -64,10 +65,14 @@ router.post("/deals/:id/dispute", async (req, res): Promise<void> => {
     openedBy: MOCK_USER_ID,
   }).returning();
 
+  // Freeze the escrowed funds for the duration of the dispute — no release,
+  // refund or forfeit may occur while a dispute is open.
+  await escrow.setFrozen(params.data.id, true);
+
   await db.insert(timelineTable).values({
     dealId: params.data.id,
     event: "dispute_opened",
-    description: `تم فتح نزاع. السبب: ${parsed.data.reason}`,
+    description: `تم فتح نزاع وتجميد الأموال المحتجزة. السبب: ${parsed.data.reason}`,
     actorName: null,
   });
 

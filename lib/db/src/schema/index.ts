@@ -5,3 +5,6 @@ export * from "./disputes";
 export * from "./timeline";
 export * from "./templates";
 export * from "./transfer_requests";
+export * from "./ledger";
+export * from "./deal_funds";
+export * from "./approvals";

@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, and, or, sql } from "drizzle-orm";
 import { db, dealsTable, usersTable, contractsTable, timelineTable, transferRequestsTable } from "@workspace/db";
+import { assertTransition, TransitionError, type DealStatus } from "../domain/stateMachine";
 import {
   ListDealsQueryParams,
   ListDealsResponse,
@@ -55,6 +56,18 @@ function formatDeal(deal: ReturnType<typeof getDealWithParties> extends Promise<
 
 async function addTimeline(dealId: number, event: string, description: string, actorName?: string) {
   await db.insert(timelineTable).values({ dealId, event, description, actorName: actorName ?? null });
+}
+
+/**
+ * Load a deal's current status and assert the requested transition is allowed
+ * by the state machine. Returns the current status, or null if the deal is
+ * missing (so the caller can 404).
+ */
+async function guardTransition(dealId: number, to: DealStatus): Promise<DealStatus | null> {
+  const [current] = await db.select({ status: dealsTable.status }).from(dealsTable).where(eq(dealsTable.id, dealId));
+  if (!current) return null;
+  assertTransition(current.status as DealStatus, to);
+  return current.status as DealStatus;
 }
 
 router.get("/deals", async (req, res): Promise<void> => {
@@ -254,6 +267,20 @@ router.post("/deals/:id/complete", async (req, res): Promise<void> => {
     return;
   }
 
+  try {
+    const current = await guardTransition(params.data.id, "completed");
+    if (current === null) {
+      res.status(404).json({ error: "الصفقة غير موجودة" });
+      return;
+    }
+  } catch (err) {
+    if (err instanceof TransitionError) {
+      res.status(err.statusCode).json({ error: err.message });
+      return;
+    }
+    throw err;
+  }
+
   const [deal] = await db.update(dealsTable).set({
     status: "completed",
     updatedAt: new Date(),
@@ -289,6 +316,20 @@ router.post("/deals/:id/cancel", async (req, res): Promise<void> => {
     return;
   }
 
+  try {
+    const current = await guardTransition(params.data.id, "cancelled");
+    if (current === null) {
+      res.status(404).json({ error: "الصفقة غير موجودة" });
+      return;
+    }
+  } catch (err) {
+    if (err instanceof TransitionError) {
+      res.status(err.statusCode).json({ error: err.message });
+      return;
+    }
+    throw err;
+  }
+
   const [deal] = await db.update(dealsTable).set({
     status: "cancelled",
     updatedAt: new Date(),
@@ -322,6 +363,20 @@ router.post("/deals/:id/forfeit", async (req, res): Promise<void> => {
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
+  }
+
+  try {
+    const current = await guardTransition(params.data.id, "forfeited");
+    if (current === null) {
+      res.status(404).json({ error: "الصفقة غير موجودة" });
+      return;
+    }
+  } catch (err) {
+    if (err instanceof TransitionError) {
+      res.status(err.statusCode).json({ error: err.message });
+      return;
+    }
+    throw err;
   }
 
   const [deal] = await db.update(dealsTable).set({
