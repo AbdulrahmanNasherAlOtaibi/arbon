@@ -163,10 +163,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   >
                     {item.label}
                   </span>
-                  <span
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: isActive ? "hsl(var(--foreground))" : "transparent" }}
-                  />
                 </button>
               </Link>
             );
