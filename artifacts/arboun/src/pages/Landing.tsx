@@ -138,7 +138,7 @@ export default function Landing() {
         {/* Brand */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <ShieldLogo size={80} logoUrl={brand.logoUrl} />
+            <ShieldLogo size={120} logoUrl={brand.logoUrl} />
           </div>
           <h1 className="text-3xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>{brand.siteName}</h1>
           <p className="text-sm font-semibold tracking-widest" style={{ color: "hsl(var(--muted-foreground))" }}>{brand.tagline}</p>
