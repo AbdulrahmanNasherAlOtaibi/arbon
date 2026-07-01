@@ -127,7 +127,7 @@ async function seed() {
       currency: "SAR",
       buyerId: abdullahId,
       sellerId: 4,
-      description: "محل بيع أدوات منزلية في شارع الامير محمد بن فهد، الدمام. قائم من 3 سنوات. عائد شهري ممتاز.",
+      description: "محل بيع أدوات منزلية في شارع الأمير محمد بن فهد، الدمام. قائم من 3 سنوات. عائد شهري ممتاز.",
       propertyAddress: "شارع الأمير محمد بن فهد، الدمام",
       vehicleInfo: null,
       deadline: oneMonth.toISOString().split("T")[0],

@@ -56,9 +56,7 @@ export default function Landing() {
           <div className="flex justify-center mb-4">
             <ShieldLogo size={80} />
           </div>
-          <h1 className="text-3xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>
-            عربون<span style={{ color: "#5BAE7E" }}>.</span>
-          </h1>
+          <h1 className="text-3xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>عربون</h1>
           <p className="text-sm font-semibold tracking-widest" style={{ color: "hsl(var(--muted-foreground))" }}>ثقتك محفوظة</p>
         </div>
 

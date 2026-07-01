@@ -141,10 +141,10 @@ export default function MyListings() {
               <li>اذهب للصفقة التي تريد التنازل عنها</li>
               <li>اضغط زر "عرض للتنازل" في صفحة تفاصيل الصفقة</li>
               <li>اختر السعر المقترح والوصف</li>
-              <li>باتوا مع البائع وابدأ بقبول أو رفض الطلبات</li>
+              <li>تابع الطلبات الواردة وابدأ بقبولها أو رفضها</li>
             </ol>
             <p className="text-xs text-muted-foreground mt-3">
-              عند التنازل، يصير مبلغ العربون للمشتري الجديد ويتم إنشاء عقد جديد بينه وبين البائع.
+              عند التنازل، ينتقل مبلغ العربون إلى المشتري الجديد ويُنشأ عقد جديد بينه وبين البائع.
             </p>
           </CardContent>
         </Card>
@@ -157,11 +157,11 @@ export default function MyListings() {
             </DialogHeader>
             <div className="space-y-4 py-2">
               <p className="text-sm text-muted-foreground">
-                بعرض الصفقة في سوق التنازلات، مشتريون آخرون يستطيعون رؤية الصفقة وتقديم طلب تنازل.
+                عند عرض الصفقة في سوق التنازلات، يستطيع مشترون آخرون رؤيتها وتقديم طلب تنازل.
               </p>
               <div>
                 <Label>سعر التنازل (ر.س)</Label>
-                <Input type="number" className="mt-1" value={listPrice} onChange={(e) => setListPrice(e.target.value)} placeholder="مثلا: 5000" />
+                <Input type="number" className="mt-1" value={listPrice} onChange={(e) => setListPrice(e.target.value)} placeholder="مثلاً: 5000" />
               </div>
               <div>
                 <Label>وصف العرض (اختياري)</Label>
