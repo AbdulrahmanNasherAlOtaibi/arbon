@@ -9,6 +9,7 @@ import disputesRouter from "./disputes";
 import dashboardRouter from "./dashboard";
 import templatesRouter from "./templates";
 import transfersRouter from "./transfers";
+import escrowRouter from "./escrow";
 
 const router: IRouter = Router();
 
@@ -54,5 +55,6 @@ router.use(disputesRouter);
 router.use(dashboardRouter);
 router.use(templatesRouter);
 router.use(transfersRouter);
+router.use(escrowRouter);
 
 export default router;
