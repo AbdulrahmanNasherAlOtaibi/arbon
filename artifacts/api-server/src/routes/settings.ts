@@ -7,6 +7,7 @@ const router: IRouter = Router();
 const DEFAULTS = {
   siteName: "عربون",
   tagline: "ثقتك محفوظة",
+  logoUrl: "",
   aboutText: "منصّة ضمان رقمية تحفظ مبلغ العربون بين البائع والمشتري حتى إتمام الصفقة.",
   supportEmail: "support@arbon.sa",
   supportPhone: "920000000",
@@ -27,6 +28,7 @@ router.get("/settings", async (_req, res): Promise<void> => {
     res.json({
       siteName: s.siteName,
       tagline: s.tagline,
+      logoUrl: s.logoUrl,
       aboutText: s.aboutText,
       supportEmail: s.supportEmail,
       supportPhone: s.supportPhone,

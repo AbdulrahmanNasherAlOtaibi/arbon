@@ -18,6 +18,7 @@ import {
   siteSettingsTable,
 } from "@workspace/db";
 import * as ledger from "../domain/ledger";
+import { onlineCount } from "./presence";
 
 const router: IRouter = Router();
 
@@ -85,6 +86,7 @@ router.get("/admin/overview", async (_req, res): Promise<void> => {
 
     res.json({
       dbConnected: true,
+      online: onlineCount(),
       counts: {
         users: users.length,
         deals: deals.length,
@@ -113,6 +115,7 @@ router.get("/admin/overview", async (_req, res): Promise<void> => {
     // No database connected — return an empty, valid overview instead of 500.
     res.json({
       dbConnected: false,
+      online: onlineCount(),
       counts: { users: 0, deals: 0, disputes: 0, transfers: 0, ledgerEntries: 0, approvals: 0, templates: 0 },
       dealsByStatus: {},
       money: { held: 0, released: 0, refunded: 0, forfeited: 0 },
@@ -157,7 +160,7 @@ router.get("/admin/settings", async (_req, res): Promise<void> => {
 router.put("/admin/settings", async (req, res): Promise<void> => {
   const body = (req.body ?? {}) as Record<string, unknown>;
   const patch: Record<string, string> = {};
-  for (const key of ["siteName", "tagline", "platformFeePercent", "supportEmail", "supportPhone", "aboutText", "bankName", "bankIban", "bankAccountHolder"]) {
+  for (const key of ["siteName", "tagline", "logoUrl", "platformFeePercent", "supportEmail", "supportPhone", "aboutText", "bankName", "bankIban", "bankAccountHolder"]) {
     if (typeof body[key] === "string" || typeof body[key] === "number") {
       patch[key] = String(body[key]);
     }

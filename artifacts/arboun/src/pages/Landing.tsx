@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
-function ShieldLogo({ size = 72 }: { size?: number }) {
+function ShieldLogo({ size = 72, logoUrl }: { size?: number; logoUrl?: string }) {
+  if (logoUrl) {
+    return (
+      <img
+        src={logoUrl}
+        alt="logo"
+        style={{ width: size, height: size, objectFit: "contain", borderRadius: Math.round(size * 0.2) }}
+      />
+    );
+  }
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" aria-label="عربون">
       <defs>
@@ -51,8 +60,9 @@ function Field({ label, ...props }: { label: string } & React.InputHTMLAttribute
 
 export default function Landing() {
   const [, navigate] = useLocation();
-  const [tab, setTab] = useState<"login" | "register" | "admin">("login");
-  const [brand, setBrand] = useState({ siteName: "عربون", tagline: "ثقتك محفوظة" });
+  const [tab, setTab] = useState<"login" | "register">("login");
+  const [brand, setBrand] = useState({ siteName: "عربون", tagline: "ثقتك محفوظة", logoUrl: "" });
+  const [online, setOnline] = useState<number | null>(null);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -64,38 +74,35 @@ export default function Landing() {
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => r.json())
-      .then((s) => s?.siteName && setBrand({ siteName: s.siteName, tagline: s.tagline }))
+      .then((s) => s?.siteName && setBrand({ siteName: s.siteName, tagline: s.tagline, logoUrl: s.logoUrl ?? "" }))
+      .catch(() => {});
+    fetch("/api/presence")
+      .then((r) => r.json())
+      .then((d) => typeof d?.online === "number" && setOnline(d.online))
       .catch(() => {});
   }, []);
 
-  // Admin tab: real gated login → the control panel.
-  async function submitAdmin() {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.token) throw new Error(data?.error ?? "بيانات الدخول غير صحيحة");
-      localStorage.setItem("arbon_admin_token", data.token);
-      navigate("/admin");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "بيانات الدخول غير صحيحة");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   async function submit() {
-    if (tab === "admin") return submitAdmin();
     setLoading(true);
     setError("");
-    // Best-effort auth: if a database is connected the account is created /
-    // verified; either way we always enter the app so the MVP demo flows.
     try {
+      // On login, admin credentials route straight to the control panel.
+      if (tab === "login") {
+        const adminRes = await fetch("/api/admin/login", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        if (adminRes.ok) {
+          const data = await adminRes.json().catch(() => ({}));
+          if (data?.token) {
+            localStorage.setItem("arbon_admin_token", data.token);
+            navigate("/admin");
+            return;
+          }
+        }
+      }
+      // Regular user auth — best effort; the demo always enters the app.
       const path = tab === "login" ? "/api/auth/login" : "/api/auth/register";
       const body = tab === "login" ? { email, password } : { name, email, phone, password };
       const res = await fetch(path, {
@@ -108,16 +115,15 @@ export default function Landing() {
         localStorage.setItem("arbon_user_token", data.token);
         localStorage.setItem("arbon_user", JSON.stringify(data.user));
       }
+      navigate("/dashboard");
     } catch {
-      // ignore — demo always proceeds
+      navigate("/dashboard");
     } finally {
       setLoading(false);
-      navigate("/dashboard");
     }
   }
 
   const isRegister = tab === "register";
-  const isAdmin = tab === "admin";
 
   return (
     <div
@@ -132,23 +138,25 @@ export default function Landing() {
         {/* Brand */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <ShieldLogo size={80} />
+            <ShieldLogo size={80} logoUrl={brand.logoUrl} />
           </div>
           <h1 className="text-3xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>{brand.siteName}</h1>
           <p className="text-sm font-semibold tracking-widest" style={{ color: "hsl(var(--muted-foreground))" }}>{brand.tagline}</p>
+          {online !== null && (
+            <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full" style={{ background: "rgba(91,174,126,0.12)", border: "1px solid rgba(91,174,126,0.25)" }}>
+              <span className="w-2 h-2 rounded-full" style={{ background: "#5BAE7E" }} />
+              <span className="text-[11.5px] font-bold" style={{ color: "#5BAE7E" }}>{online.toLocaleString("ar-SA")} متواجد الآن</span>
+            </div>
+          )}
         </div>
 
         {/* Tabs */}
         <div className="flex p-1 rounded-[14px] mb-5 gap-1" style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}>
-          {([["login", "دخول"], ["register", "حساب جديد"], ["admin", "لوحة التحكم"]] as const).map(([key, label]) => (
+          {([["login", "تسجيل الدخول"], ["register", "إنشاء حساب"]] as const).map(([key, label]) => (
             <button
               key={key}
-              onClick={() => {
-                setError("");
-                if (key === "admin" && !email) setEmail("admin@arbon.sa");
-                setTab(key);
-              }}
-              className="flex-1 py-2.5 rounded-[11px] text-[12.5px] font-bold transition-colors"
+              onClick={() => { setTab(key); setError(""); }}
+              className="flex-1 py-2.5 rounded-[11px] text-[13px] font-bold transition-colors"
               style={{
                 background: tab === key ? "hsl(var(--foreground))" : "transparent",
                 color: tab === key ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
@@ -158,12 +166,6 @@ export default function Landing() {
             </button>
           ))}
         </div>
-
-        {isAdmin && (
-          <p className="text-center text-[12px] mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>
-            الدخول للمشرفين فقط — للوصول إلى لوحة التحكم الكاملة.
-          </p>
-        )}
 
         {/* Form */}
         <form className="space-y-3.5" onSubmit={(e) => { e.preventDefault(); submit(); }}>
@@ -184,18 +186,16 @@ export default function Landing() {
             className="w-full py-4 rounded-[15px] text-sm font-extrabold mt-1 transition-transform active:scale-[0.98]"
             style={{ background: "linear-gradient(135deg, #F2F3F4, #C4C8CE)", color: "#1A1B1E", opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? "جاري..." : isAdmin ? "دخول لوحة التحكم" : isRegister ? "إنشاء حساب" : "تسجيل الدخول"}
+            {loading ? "جاري..." : isRegister ? "إنشاء حساب" : "تسجيل الدخول"}
           </button>
         </form>
 
-        {!isAdmin && (
-          <p className="text-center text-[13px] mt-6" style={{ color: "hsl(var(--muted-foreground))" }}>
-            {isRegister ? "لديك حساب بالفعل؟ " : "ليس لديك حساب؟ "}
-            <span className="font-bold cursor-pointer" style={{ color: "hsl(var(--foreground))" }} onClick={() => { setTab(isRegister ? "login" : "register"); setError(""); }}>
-              {isRegister ? "تسجيل الدخول" : "إنشاء حساب جديد"}
-            </span>
-          </p>
-        )}
+        <p className="text-center text-[13px] mt-6" style={{ color: "hsl(var(--muted-foreground))" }}>
+          {isRegister ? "لديك حساب بالفعل؟ " : "ليس لديك حساب؟ "}
+          <span className="font-bold cursor-pointer" style={{ color: "hsl(var(--foreground))" }} onClick={() => { setTab(isRegister ? "login" : "register"); setError(""); }}>
+            {isRegister ? "تسجيل الدخول" : "إنشاء حساب جديد"}
+          </span>
+        </p>
       </div>
     </div>
   );

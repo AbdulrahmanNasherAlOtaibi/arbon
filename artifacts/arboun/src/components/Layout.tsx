@@ -4,19 +4,22 @@ import { cn } from "@/lib/utils";
 import { useGetMe } from "@workspace/api-client-react";
 import { useTx } from "@/lib/translations";
 
-/** Site brand (name + tagline) controlled from the admin panel. */
+/** Site brand (name + tagline + logo) controlled from the admin panel. */
 function useBrand() {
-  const [brand, setBrand] = useState({ siteName: "عربون", tagline: "ثقتك محفوظة" });
+  const [brand, setBrand] = useState({ siteName: "عربون", tagline: "ثقتك محفوظة", logoUrl: "" });
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => r.json())
-      .then((s) => s?.siteName && setBrand({ siteName: s.siteName, tagline: s.tagline }))
+      .then((s) => s?.siteName && setBrand({ siteName: s.siteName, tagline: s.tagline, logoUrl: s.logoUrl ?? "" }))
       .catch(() => {});
   }, []);
   return brand;
 }
 
-function ShieldLogo({ size = 32 }: { size?: number }) {
+function ShieldLogo({ size = 32, logoUrl }: { size?: number; logoUrl?: string }) {
+  if (logoUrl) {
+    return <img src={logoUrl} alt="logo" style={{ width: size, height: size, objectFit: "contain", borderRadius: Math.round(size * 0.2) }} />;
+  }
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" aria-label="عربون">
       <defs>
@@ -128,7 +131,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           style={{ background: "hsl(var(--card))", borderBottom: "1px solid hsl(var(--card-border))" }}
         >
           <div className="flex items-center gap-2.5">
-            <ShieldLogo size={30} />
+            <ShieldLogo size={30} logoUrl={brand.logoUrl} />
             <div className="leading-none">
               <p className="font-extrabold text-base leading-none" style={{ color: "hsl(var(--foreground))" }}>{brand.siteName}</p>
               <p className="text-[9px] mt-0.5 tracking-widest" style={{ color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>{brand.tagline}</p>

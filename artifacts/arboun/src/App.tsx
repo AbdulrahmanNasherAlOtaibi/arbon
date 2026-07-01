@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -54,7 +55,28 @@ function Router() {
   );
 }
 
+/** Heartbeat so the platform can count who is currently online. */
+function usePresenceHeartbeat() {
+  useEffect(() => {
+    let sid = localStorage.getItem("arbon_sid");
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem("arbon_sid", sid);
+    }
+    const ping = () =>
+      fetch("/api/presence", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ sid }),
+      }).catch(() => {});
+    ping();
+    const iv = setInterval(ping, 30_000);
+    return () => clearInterval(iv);
+  }, []);
+}
+
 function App() {
+  usePresenceHeartbeat();
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

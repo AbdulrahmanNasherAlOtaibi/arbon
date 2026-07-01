@@ -11,6 +11,7 @@ export const siteSettingsTable = pgTable("site_settings", {
   id: serial("id").primaryKey(),
   siteName: text("site_name").notNull().default("عربون"),
   tagline: text("tagline").notNull().default("ثقتك محفوظة"),
+  logoUrl: text("logo_url").notNull().default(""),
   platformFeePercent: numeric("platform_fee_percent", { precision: 5, scale: 2 }).notNull().default("2"),
   supportEmail: text("support_email").notNull().default("support@arbon.sa"),
   supportPhone: text("support_phone").notNull().default("920000000"),

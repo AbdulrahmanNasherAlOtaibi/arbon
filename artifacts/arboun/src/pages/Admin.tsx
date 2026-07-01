@@ -5,6 +5,7 @@ const TOKEN_KEY = "arbon_admin_token";
 
 type Overview = {
   dbConnected?: boolean;
+  online?: number;
   counts: Record<string, number>;
   dealsByStatus: Record<string, number>;
   money: { held: number; released: number; refunded: number; forfeited: number };
@@ -306,6 +307,13 @@ export default function Admin() {
         {overview && (
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 12 }}>
+              <div style={{ ...card, borderColor: "rgba(91,174,126,0.4)" }}>
+                <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 12, marginBottom: 6 }}>المتواجدون الآن</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#5BAE7E", fontSize: 20, fontWeight: 800 }}>
+                  <span style={{ width: 9, height: 9, borderRadius: 999, background: "#5BAE7E", display: "inline-block" }} />
+                  {overview.online ?? 0}
+                </div>
+              </div>
               {stat("الصفقات", overview.counts.deals ?? 0)}
               {stat("المستخدمون", overview.counts.users ?? 0)}
               {stat("موثّقون", overview.verifiedUsers)}
@@ -341,6 +349,7 @@ export default function Admin() {
               {([
                 ["siteName", "اسم الموقع"],
                 ["tagline", "الشعار النصّي"],
+                ["logoUrl", "رابط شعار المنصة (صورة)"],
                 ["platformFeePercent", "نسبة رسوم المنصة %"],
                 ["supportEmail", "بريد الدعم"],
                 ["supportPhone", "هاتف الدعم"],

@@ -13,6 +13,7 @@ import escrowRouter from "./escrow";
 import adminRouter from "./admin";
 import authRouter from "./auth";
 import settingsRouter from "./settings";
+import presenceRouter from "./presence";
 
 const router: IRouter = Router();
 
@@ -46,6 +47,7 @@ router.use(healthRouter);
 router.use(adminRouter);
 router.use(authRouter);
 router.use(settingsRouter);
+router.use(presenceRouter);
 
 router.use(async (_req, _res, next) => {
   await ensureChecked();
