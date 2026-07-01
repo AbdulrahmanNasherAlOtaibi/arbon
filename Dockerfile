@@ -7,7 +7,9 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.13.1 --activate
 
 # Copy workspace manifests + .npmrc first (maximises layer cache)
-COPY .npmrc package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+# tsconfig.base.json is required because every package's tsconfig extends it —
+# without it Vite/esbuild fail to resolve the tsconfig `extends` chain.
+COPY .npmrc package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json tsconfig.json ./
 
 # Copy shared lib packages (workspace:* dependencies of api-server + frontend)
 COPY lib/ ./lib/
