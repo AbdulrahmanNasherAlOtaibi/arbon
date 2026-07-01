@@ -1,25 +1,29 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import logoUrl from "@/assets/logo.png";
 
 function ShieldLogo({ size = 72 }: { size?: number }) {
   return (
-    <span
-      style={{
-        width: size,
-        height: size,
-        borderRadius: Math.round(size * 0.24),
-        background: "#191A1E",
-        border: "1px solid rgba(255,255,255,0.06)",
-        boxShadow: "0 10px 26px rgba(0,0,0,0.45)",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-      }}
-    >
-      <img src={logoUrl} alt="عربون" style={{ width: "84%", height: "84%", objectFit: "contain" }} />
-    </span>
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" aria-label="عربون">
+      <defs>
+        <linearGradient id="login-metal" x1="12%" y1="0%" x2="88%" y2="100%">
+          <stop offset="0%" stopColor="#F6F7F8" />
+          <stop offset="34%" stopColor="#AAB0B8" />
+          <stop offset="62%" stopColor="#D8DCE0" />
+          <stop offset="100%" stopColor="#878D95" />
+        </linearGradient>
+        <radialGradient id="login-sphere" cx="38%" cy="32%" r="78%">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="46%" stopColor="#C7CCD2" />
+          <stop offset="100%" stopColor="#7C828B" />
+        </radialGradient>
+      </defs>
+      <g stroke="url(#login-metal)" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <path d="M46 10 L86 30 L86 70 L55 87" />
+        <path d="M54 90 L14 70 L14 30 L45 13" />
+      </g>
+      <circle cx="50" cy="50" r="11" fill="url(#login-sphere)" />
+      <circle cx="46" cy="46" r="3.4" fill="#FFFFFF" opacity="0.65" />
+    </svg>
   );
 }
 

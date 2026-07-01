@@ -192,13 +192,12 @@ export async function seedDemoData(
   await db.insert(approvalsTable).values({ dealId: refunded.id, action: "refund", amount: money(40000), reason: "قرار تحكيم لصالح المشتري", status: "executed", makerId: MAKER, checkerId: CHECKER, decidedAt: new Date() });
   await addTimeline(refunded.id, "funds_refunded", "تم استرداد كامل مبلغ العربون (40,000 ر.س) للمشتري", "النظام");
 
-  // 5) FORFEITED — buyer withdrew
-  const forfeited = await createDeal({ title: "تويوتا لاندكروزر 2023", type: "vehicle", status: "forfeited", amount: 50000, buyerId: KHALID, sellerId: CARS, deadline: daysFromNow(-5), description: "لاندكروزر GXR 2023، رمادي.", vehicleInfo: "GXR 2023 - رمادي" });
-  await setFunds(forfeited.id, "forfeited", 50000);
-  const forfPayout = 50000 - forfeited.fee;
-  await postLedger(forfeited.id, `deposit:${forfeited.id}`, "إيداع العربون", [{ account: "escrow_cash", direction: "debit", amount: 50000 }, { account: "buyer_held", direction: "credit", amount: 50000 }]);
-  await postLedger(forfeited.id, `forfeit:${forfeited.id}`, "مصادرة العربون لصالح البائع", [{ account: "buyer_held", direction: "debit", amount: 50000 }, { account: "seller_payout", direction: "credit", amount: forfPayout }, { account: "platform_revenue", direction: "credit", amount: forfeited.fee }]);
-  await addTimeline(forfeited.id, "funds_forfeited", `تمت مصادرة العربون لصالح البائع (${forfPayout.toLocaleString("ar-SA")} ر.س)`, "النظام");
+  // 5) REFUNDED — buyer withdrew and got the full deposit back (no forfeiture)
+  const withdrawn = await createDeal({ title: "تويوتا لاندكروزر 2023", type: "vehicle", status: "refunded", amount: 50000, buyerId: KHALID, sellerId: CARS, deadline: daysFromNow(-5), description: "لاندكروزر GXR 2023، رمادي.", vehicleInfo: "GXR 2023 - رمادي" });
+  await setFunds(withdrawn.id, "refunded", 50000);
+  await postLedger(withdrawn.id, `deposit:${withdrawn.id}`, "إيداع العربون", [{ account: "escrow_cash", direction: "debit", amount: 50000 }, { account: "buyer_held", direction: "credit", amount: 50000 }]);
+  await postLedger(withdrawn.id, `refund:${withdrawn.id}`, "استرداد كامل العربون للمشتري بعد انسحابه", [{ account: "buyer_held", direction: "debit", amount: 50000 }, { account: "buyer_refund", direction: "credit", amount: 50000 }]);
+  await addTimeline(withdrawn.id, "funds_refunded", `انسحب المشتري وتم استرداد كامل مبلغ العربون له (50,000 ر.س) دون أي مصادرة`, "النظام");
 
   // 6) PENDING — awaiting signatures/deposit
   const pending = await createDeal({ title: "شقة في جدة — حي الشاطئ", type: "real_estate", status: "pending", amount: 75000, buyerId: YOU, sellerId: REALESTATE, deadline: daysFromNow(30), signed: false, description: "شقة 3 غرف تطل على البحر، حي الشاطئ، جدة.", propertyAddress: "حي الشاطئ، جدة" });

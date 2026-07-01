@@ -161,8 +161,8 @@ export default function DealDetail({ id }: Props) {
 
   const actionLabels: Record<string, string> = {
     complete: "تأكيد إتمام الصفقة",
-    cancel: "إلغاء الصفقة",
-    forfeit: "الانسحاب ومصادرة العربون",
+    cancel: "الانسحاب واسترداد العربون",
+    forfeit: "الانسحاب واسترداد العربون",
     list: "عرض الصفقة للتنازل",
   };
 
@@ -336,10 +336,7 @@ export default function DealDetail({ id }: Props) {
                 فتح نزاع
               </DangerBtn>
             )}
-            <DangerBtn onClick={() => setActiveAction("cancel")}>إلغاء الصفقة</DangerBtn>
-            {isBuyer && (
-              <SecondaryBtn onClick={() => setActiveAction("forfeit")}>الانسحاب</SecondaryBtn>
-            )}
+            <DangerBtn onClick={() => setActiveAction("cancel")}>الانسحاب واسترداد العربون</DangerBtn>
             {isBuyer && deal.transferStatus !== "listed" && deal.status === "active" && (
               <SecondaryBtn onClick={() => { setActiveAction("list"); setListPrice(String(deal.amount ?? "")); }}>
                 عرض للتنازل
@@ -422,8 +419,8 @@ export default function DealDetail({ id }: Props) {
               <>
                 <p className="text-sm mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
                   {activeAction === "cancel"
-                    ? "يجب ذكر سبب الإلغاء. سيُعاد مبلغ العربون للمشتري."
-                    : "يجب ذكر سبب الانسحاب. سيُصادر مبلغ العربون لصالح البائع."}
+                    ? "يجب ذكر سبب الانسحاب. سيُعاد مبلغ العربون للمشتري بالكامل."
+                    : "يجب ذكر السبب. سيُعاد مبلغ العربون للمشتري بالكامل."}
                 </p>
                 <Textarea
                   placeholder="اكتب السبب هنا..."
