@@ -15,6 +15,11 @@ spec:
         - key: NODE_ENV
           value: production
           type: GENERAL
+        # Auto-load the demo dataset on boot when the database is empty.
+        # Safe: it never overwrites an already-populated database.
+        - key: DEMO_SEED
+          value: "true"
+          type: GENERAL
         - key: SESSION_SECRET
           type: SECRET
         - key: DATABASE_URL
