@@ -21,7 +21,10 @@ async function doCheck(): Promise<void> {
     return;
   }
   try {
-    await pool.query("SELECT 1");
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("db-timeout")), 3000),
+    );
+    await Promise.race([pool.query("SELECT 1"), timeout]);
   } catch {
     useMock = true;
   }
