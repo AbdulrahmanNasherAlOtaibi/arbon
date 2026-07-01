@@ -28,8 +28,9 @@ app.use(
   }),
 );
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Larger limit so uploaded logos (base64 data URLs) fit in the settings payload.
+app.use(express.json({ limit: "3mb" }));
+app.use(express.urlencoded({ extended: true, limit: "3mb" }));
 
 app.use("/api", router);
 

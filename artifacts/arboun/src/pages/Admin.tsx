@@ -216,6 +216,30 @@ export default function Admin() {
     api("/admin/settings", token).then((s) => s && setSettings(s)).catch(() => {});
   }, [token]);
 
+  function onLogoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 256;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d")?.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/png");
+        setSettings((s) => ({ ...(s ?? {}), logoUrl: dataUrl }));
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
   async function saveSettings() {
     if (!token || !settings) return;
     try {
@@ -345,11 +369,34 @@ export default function Admin() {
                 <button onClick={saveSettings} style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))", border: "none", borderRadius: 10, padding: "8px 18px", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>حفظ</button>
               </div>
             </div>
+            {/* Logo upload */}
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, flexWrap: "wrap" }}>
+              <div style={{ width: 64, height: 64, borderRadius: 16, background: "#191A1E", border: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flex: "none" }}>
+                {settings.logoUrl ? (
+                  <img src={settings.logoUrl} alt="logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                ) : (
+                  <span style={{ color: "hsl(var(--muted-foreground))", fontSize: 11 }}>لا شعار</span>
+                )}
+              </div>
+              <div>
+                <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 12, marginBottom: 6 }}>شعار المنصة (صورة)</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <label style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))", borderRadius: 10, padding: "8px 16px", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>
+                    رفع صورة
+                    <input type="file" accept="image/*" style={{ display: "none" }} onChange={onLogoFile} />
+                  </label>
+                  {settings.logoUrl && (
+                    <button onClick={() => setSettings({ ...settings, logoUrl: "" })} style={{ background: "rgba(203,96,96,0.14)", color: "#CB6060", border: "1px solid rgba(203,96,96,0.25)", borderRadius: 10, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>إزالة</button>
+                  )}
+                </div>
+                <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 11, marginTop: 6 }}>PNG/JPG — تُصغَّر تلقائياً. اضغط «حفظ» بعد الرفع.</div>
+              </div>
+            </div>
+
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>
               {([
                 ["siteName", "اسم الموقع"],
                 ["tagline", "الشعار النصّي"],
-                ["logoUrl", "رابط شعار المنصة (صورة)"],
                 ["platformFeePercent", "نسبة رسوم المنصة %"],
                 ["supportEmail", "بريد الدعم"],
                 ["supportPhone", "هاتف الدعم"],
