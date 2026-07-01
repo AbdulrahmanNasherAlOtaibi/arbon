@@ -3,17 +3,26 @@ import { useLocation } from "wouter";
 
 function ShieldLogo({ size = 72 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" aria-label="عربون">
       <defs>
-        <linearGradient id="login-lg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#F2F3F4" />
-          <stop offset="48%" stopColor="#9DA2AA" />
-          <stop offset="100%" stopColor="#CBCFD4" />
+        <linearGradient id="login-metal" x1="12%" y1="0%" x2="88%" y2="100%">
+          <stop offset="0%" stopColor="#F6F7F8" />
+          <stop offset="34%" stopColor="#AAB0B8" />
+          <stop offset="62%" stopColor="#D8DCE0" />
+          <stop offset="100%" stopColor="#878D95" />
         </linearGradient>
+        <radialGradient id="login-sphere" cx="38%" cy="32%" r="78%">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="46%" stopColor="#C7CCD2" />
+          <stop offset="100%" stopColor="#7C828B" />
+        </radialGradient>
       </defs>
-      <path d="M50 4 L90 26 V62 C90 79 72 91 50 96 C28 91 10 79 10 62 V26 Z" fill="url(#login-lg)" />
-      <circle cx="50" cy="21" r="5.5" fill="#1A1B1E" opacity="0.55" />
-      <rect x="41" y="45" width="18" height="18" rx="2" fill="#1A1B1E" opacity="0.55" transform="rotate(45 50 54)" />
+      <g stroke="url(#login-metal)" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <path d="M46 10 L86 30 L86 70 L55 87" />
+        <path d="M54 90 L14 70 L14 30 L45 13" />
+      </g>
+      <circle cx="50" cy="50" r="11" fill="url(#login-sphere)" />
+      <circle cx="46" cy="46" r="3.4" fill="#FFFFFF" opacity="0.65" />
     </svg>
   );
 }
@@ -40,16 +49,21 @@ export default function Landing() {
     <div
       dir="rtl"
       className="min-h-screen flex items-center justify-center"
-      style={{ background: "hsl(var(--background))" }}
+      style={{
+        background:
+          "radial-gradient(70% 45% at 50% 8%, rgba(91,174,126,0.12), transparent 60%), radial-gradient(120% 90% at 50% 0%, hsl(var(--card)) 0%, hsl(var(--background)) 50%, hsl(var(--background)) 100%)",
+      }}
     >
       <div className="w-full max-w-sm px-6">
         {/* Brand */}
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
-            <ShieldLogo size={72} />
+            <ShieldLogo size={80} />
           </div>
-          <h1 className="text-3xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>عربون</h1>
-          <p className="text-sm font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>ثقتك محفوظة</p>
+          <h1 className="text-3xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>
+            عربون<span style={{ color: "#5BAE7E" }}>.</span>
+          </h1>
+          <p className="text-sm font-semibold tracking-widest" style={{ color: "hsl(var(--muted-foreground))" }}>ثقتك محفوظة</p>
         </div>
 
         {/* Form */}
