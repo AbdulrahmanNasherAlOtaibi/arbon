@@ -138,7 +138,7 @@ router.get("/admin/settings", async (_req, res): Promise<void> => {
 router.put("/admin/settings", async (req, res): Promise<void> => {
   const body = (req.body ?? {}) as Record<string, unknown>;
   const patch: Record<string, string> = {};
-  for (const key of ["siteName", "tagline", "platformFeePercent", "supportEmail", "supportPhone", "aboutText"]) {
+  for (const key of ["siteName", "tagline", "platformFeePercent", "supportEmail", "supportPhone", "aboutText", "bankName", "bankIban", "bankAccountHolder"]) {
     if (typeof body[key] === "string" || typeof body[key] === "number") {
       patch[key] = String(body[key]);
     }
@@ -175,6 +175,34 @@ router.delete("/admin/:table/:id", async (req, res): Promise<void> => {
     res.json({ ok: true });
   } catch (err) {
     res.status(409).json({ error: err instanceof Error ? err.message : "تعذّر الحذف (قد تكون هناك سجلات مرتبطة)" });
+  }
+});
+
+// ── Edit any row (whitelisted tables) ────────────────────────────────────────
+router.patch("/admin/:table/:id", async (req, res): Promise<void> => {
+  const table = DELETABLE[req.params.table as string];
+  const id = Number(req.params.id);
+  if (!table || !Number.isInteger(id)) {
+    res.status(400).json({ error: "جدول أو معرّف غير صالح" });
+    return;
+  }
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const set: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(body)) {
+    // Skip the id and any timestamp columns (…At) to avoid type conflicts.
+    if (key === "id" || /At$/.test(key) || value === null || value === undefined) continue;
+    set[key] = value;
+  }
+  if (Object.keys(set).length === 0) {
+    res.status(400).json({ error: "لا توجد حقول للتعديل" });
+    return;
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.update(table as any).set(set).where(eq((table as any).id, id));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : "تعذّر التعديل" });
   }
 });
 

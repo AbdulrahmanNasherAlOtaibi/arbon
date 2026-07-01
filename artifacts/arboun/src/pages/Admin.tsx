@@ -45,9 +45,10 @@ function money(n: number) {
   return `${Number(n).toLocaleString("ar-SA")} ر.س`;
 }
 
-function DataTable({ rows, onDelete }: { rows: Record<string, unknown>[]; onDelete?: (id: number) => void }) {
+function DataTable({ rows, onDelete, onEdit }: { rows: Record<string, unknown>[]; onDelete?: (id: number) => void; onEdit?: (row: Record<string, unknown>) => void }) {
   if (!rows.length) return <p style={{ color: "hsl(var(--muted-foreground))", padding: 16 }}>لا توجد بيانات</p>;
   const cols = Object.keys(rows[0]!);
+  const actions = onDelete || onEdit;
   return (
     <div style={{ overflowX: "auto", ...card, padding: 0 }}>
       <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12, whiteSpace: "nowrap" }}>
@@ -58,7 +59,7 @@ function DataTable({ rows, onDelete }: { rows: Record<string, unknown>[]; onDele
                 {c}
               </th>
             ))}
-            {onDelete && <th style={{ padding: "10px 12px", borderBottom: "1px solid hsl(var(--card-border))" }} />}
+            {actions && <th style={{ padding: "10px 12px", borderBottom: "1px solid hsl(var(--card-border))" }} />}
           </tr>
         </thead>
         <tbody>
@@ -73,20 +74,60 @@ function DataTable({ rows, onDelete }: { rows: Record<string, unknown>[]; onDele
                   </td>
                 );
               })}
-              {onDelete && (
-                <td style={{ padding: "9px 12px" }}>
-                  <button
-                    onClick={() => onDelete(Number(r.id))}
-                    style={{ background: "rgba(203,96,96,0.14)", color: "#CB6060", border: "1px solid rgba(203,96,96,0.25)", borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
-                  >
-                    حذف
-                  </button>
+              {actions && (
+                <td style={{ padding: "9px 12px", display: "flex", gap: 6 }}>
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(r)}
+                      style={{ background: "hsl(var(--input))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))", borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+                    >
+                      تعديل
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      onClick={() => onDelete(Number(r.id))}
+                      style={{ background: "rgba(203,96,96,0.14)", color: "#CB6060", border: "1px solid rgba(203,96,96,0.25)", borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+                    >
+                      حذف
+                    </button>
+                  )}
                 </td>
               )}
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function EditModal({ row, onClose, onSave }: { row: Record<string, unknown>; onClose: () => void; onSave: (patch: Record<string, string>) => void }) {
+  const [form, setForm] = useState<Record<string, string>>(() =>
+    Object.fromEntries(Object.entries(row).map(([k, v]) => [k, v === null || v === undefined ? "" : String(v)])),
+  );
+  const editable = Object.keys(row).filter((k) => k !== "id" && !/At$/.test(k));
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 16 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ ...card, width: "100%", maxWidth: 460, maxHeight: "85vh", overflowY: "auto" }}>
+        <h3 style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>تعديل السجل رقم {String(row.id)}</h3>
+        <div style={{ display: "grid", gap: 10 }}>
+          {editable.map((k) => (
+            <label key={k} style={{ display: "block" }}>
+              <span style={{ display: "block", color: "hsl(var(--muted-foreground))", fontSize: 12, marginBottom: 4 }}>{k}</span>
+              <input
+                value={form[k] ?? ""}
+                onChange={(e) => setForm({ ...form, [k]: e.target.value })}
+                style={{ width: "100%", background: "hsl(var(--input))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "9px 12px", color: "hsl(var(--foreground))", fontSize: 13, outline: "none" }}
+              />
+            </label>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8, marginTop: 16, justifyContent: "flex-start" }}>
+          <button onClick={() => onSave(Object.fromEntries(editable.map((k) => [k, form[k] ?? ""])))} style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))", border: "none", borderRadius: 10, padding: "9px 20px", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>حفظ</button>
+          <button onClick={onClose} style={{ background: "hsl(var(--input))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "9px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>إلغاء</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -152,6 +193,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<Record<string, string> | null>(null);
   const [savedMsg, setSavedMsg] = useState("");
+  const [editRow, setEditRow] = useState<Record<string, unknown> | null>(null);
 
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
@@ -185,6 +227,20 @@ export default function Admin() {
     try {
       await api(`/admin/${tab}/${rowId}`, token, { method: "DELETE" });
       setRows((rs) => rs.filter((r) => Number(r.id) !== rowId));
+      api("/admin/overview", token).then(setOverview).catch(() => {});
+    } catch (e) {
+      alert(String((e as Error).message ?? e));
+    }
+  }
+
+  async function saveEdit(patch: Record<string, string>) {
+    if (!token || !editRow) return;
+    const rowId = Number(editRow.id);
+    try {
+      await api(`/admin/${tab}/${rowId}`, token, { method: "PATCH", body: JSON.stringify(patch) });
+      const fresh = await api(`/admin/${tab}`, token);
+      setRows(fresh);
+      setEditRow(null);
       api("/admin/overview", token).then(setOverview).catch(() => {});
     } catch (e) {
       alert(String((e as Error).message ?? e));
@@ -278,6 +334,9 @@ export default function Admin() {
                 ["supportEmail", "بريد الدعم"],
                 ["supportPhone", "هاتف الدعم"],
                 ["aboutText", "نبذة عن الموقع"],
+                ["bankName", "الحساب البنكي — اسم البنك"],
+                ["bankIban", "الحساب البنكي — الآيبان (IBAN)"],
+                ["bankAccountHolder", "الحساب البنكي — اسم صاحب الحساب"],
               ] as const).map(([key, label]) => (
                 <label key={key} style={{ display: "block" }}>
                   <span style={{ display: "block", color: "hsl(var(--muted-foreground))", fontSize: 12, marginBottom: 6 }}>{label}</span>
@@ -309,8 +368,10 @@ export default function Admin() {
           ))}
         </div>
 
-        {loading ? <p style={{ color: "hsl(var(--muted-foreground))" }}>جاري التحميل...</p> : <DataTable rows={rows} onDelete={deleteRow} />}
+        {loading ? <p style={{ color: "hsl(var(--muted-foreground))" }}>جاري التحميل...</p> : <DataTable rows={rows} onDelete={deleteRow} onEdit={setEditRow} />}
       </div>
+
+      {editRow && <EditModal row={editRow} onClose={() => setEditRow(null)} onSave={saveEdit} />}
     </div>
   );
 }

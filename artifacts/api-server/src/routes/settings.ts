@@ -11,6 +11,9 @@ const DEFAULTS = {
   supportEmail: "support@arbon.sa",
   supportPhone: "920000000",
   platformFeePercent: 2,
+  bankName: "",
+  bankIban: "",
+  bankAccountHolder: "",
 };
 
 /** Public, read-only site branding/details used by the frontend. */
@@ -28,6 +31,9 @@ router.get("/settings", async (_req, res): Promise<void> => {
       supportEmail: s.supportEmail,
       supportPhone: s.supportPhone,
       platformFeePercent: Number(s.platformFeePercent),
+      bankName: s.bankName,
+      bankIban: s.bankIban,
+      bankAccountHolder: s.bankAccountHolder,
     });
   } catch {
     res.json(DEFAULTS);

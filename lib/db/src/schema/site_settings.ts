@@ -15,6 +15,10 @@ export const siteSettingsTable = pgTable("site_settings", {
   supportEmail: text("support_email").notNull().default("support@arbon.sa"),
   supportPhone: text("support_phone").notNull().default("920000000"),
   aboutText: text("about_text").notNull().default("منصّة ضمان رقمية تحفظ مبلغ العربون بين البائع والمشتري حتى إتمام الصفقة."),
+  // Platform escrow bank account (where deposits are held).
+  bankName: text("bank_name").notNull().default(""),
+  bankIban: text("bank_iban").notNull().default(""),
+  bankAccountHolder: text("bank_account_holder").notNull().default(""),
 });
 
 export const insertSiteSettingsSchema = createInsertSchema(siteSettingsTable).omit({ id: true });

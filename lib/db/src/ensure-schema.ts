@@ -164,6 +164,9 @@ CREATE TABLE IF NOT EXISTS site_settings (
   support_phone text NOT NULL DEFAULT '920000000',
   about_text text NOT NULL DEFAULT 'منصّة ضمان رقمية تحفظ مبلغ العربون بين البائع والمشتري حتى إتمام الصفقة.'
 );
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS bank_name text NOT NULL DEFAULT '';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS bank_iban text NOT NULL DEFAULT '';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS bank_account_holder text NOT NULL DEFAULT '';
 INSERT INTO site_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 `;
 
