@@ -2,13 +2,12 @@ import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, usersTable } from "@workspace/db";
 import { GetMeResponse, UpdateMeBody, UpdateMeResponse } from "@workspace/api-zod";
+import { resolveUserId } from "../lib/auth-token";
 
 const router: IRouter = Router();
 
-const MOCK_USER_ID = 1;
-
 router.get("/users/me", async (req, res): Promise<void> => {
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, MOCK_USER_ID));
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, resolveUserId(req)));
   if (!user) {
     res.status(404).json({ error: "User not found" });
     return;
@@ -25,7 +24,7 @@ router.patch("/users/me", async (req, res): Promise<void> => {
   const [user] = await db
     .update(usersTable)
     .set({ ...parsed.data, updatedAt: new Date() })
-    .where(eq(usersTable.id, MOCK_USER_ID))
+    .where(eq(usersTable.id, resolveUserId(req)))
     .returning();
   if (!user) {
     res.status(404).json({ error: "User not found" });

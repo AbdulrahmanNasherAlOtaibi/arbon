@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/lib/settings-context";
@@ -19,6 +20,10 @@ import Landing from "@/pages/Landing";
 import Notifications from "@/pages/Notifications";
 import Settings from "@/pages/Settings";
 import Admin from "@/pages/Admin";
+
+// Attach the signed-in user's token to every API request so the server can
+// resolve the real account (profile, deals, …) instead of the demo user.
+setAuthTokenGetter(() => localStorage.getItem("arbon_user_token"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

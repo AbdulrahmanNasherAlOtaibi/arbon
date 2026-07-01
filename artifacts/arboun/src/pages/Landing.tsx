@@ -79,7 +79,7 @@ export default function Landing() {
           }
         }
       }
-      // Regular user auth — best effort; the demo always enters the app.
+      // Regular user auth against the database.
       const path = tab === "login" ? "/api/auth/login" : "/api/auth/register";
       const body = tab === "login" ? { email, password } : { name, email, phone, password };
       const res = await fetch(path, {
@@ -91,10 +91,18 @@ export default function Landing() {
       if (res.ok && data?.token) {
         localStorage.setItem("arbon_user_token", data.token);
         localStorage.setItem("arbon_user", JSON.stringify(data.user));
+        navigate("/dashboard");
+        return;
       }
-      navigate("/dashboard");
+      // Surface the server-side reason (bad credentials, duplicate email, …).
+      setError(
+        data?.error ??
+          (tab === "login"
+            ? "تعذّر تسجيل الدخول، تأكد من البريد وكلمة المرور"
+            : "تعذّر إنشاء الحساب، حاول مرة أخرى"),
+      );
     } catch {
-      navigate("/dashboard");
+      setError("تعذّر الاتصال بالخادم، تحقق من الإنترنت وحاول مجدداً");
     } finally {
       setLoading(false);
     }

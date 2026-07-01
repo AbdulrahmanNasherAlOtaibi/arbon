@@ -1,14 +1,15 @@
 import { Router, type IRouter } from "express";
-import { createHmac, createHash } from "node:crypto";
+import { createHash } from "node:crypto";
 import { eq, or } from "drizzle-orm";
 import { z } from "zod/v4";
 import { db, usersTable } from "@workspace/db";
+import { makeUserToken } from "../lib/auth-token";
 
 const router: IRouter = Router();
 const SECRET = process.env["SESSION_SECRET"] ?? "arbon-dev-secret";
 
 const hashPassword = (p: string) => createHash("sha256").update(`${SECRET}:${p}`).digest("hex");
-const userToken = (id: number) => createHmac("sha256", SECRET).update(`user:${id}`).digest("hex");
+const userToken = (id: number) => makeUserToken(id);
 
 function publicUser(u: typeof usersTable.$inferSelect) {
   const { password: _pw, ...rest } = u;
