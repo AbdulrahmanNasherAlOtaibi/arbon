@@ -51,7 +51,7 @@ function Field({ label, ...props }: { label: string } & React.InputHTMLAttribute
 
 export default function Landing() {
   const [, navigate] = useLocation();
-  const [tab, setTab] = useState<"login" | "register">("login");
+  const [tab, setTab] = useState<"login" | "register" | "admin">("login");
   const [brand, setBrand] = useState({ siteName: "عربون", tagline: "ثقتك محفوظة" });
 
   const [name, setName] = useState("");
@@ -68,7 +68,29 @@ export default function Landing() {
       .catch(() => {});
   }, []);
 
+  // Admin tab: real gated login → the control panel.
+  async function submitAdmin() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.token) throw new Error(data?.error ?? "بيانات الدخول غير صحيحة");
+      localStorage.setItem("arbon_admin_token", data.token);
+      navigate("/admin");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "بيانات الدخول غير صحيحة");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function submit() {
+    if (tab === "admin") return submitAdmin();
     setLoading(true);
     setError("");
     // Best-effort auth: if a database is connected the account is created /
@@ -94,7 +116,8 @@ export default function Landing() {
     }
   }
 
-  const isLogin = tab === "login";
+  const isRegister = tab === "register";
+  const isAdmin = tab === "admin";
 
   return (
     <div
@@ -116,12 +139,16 @@ export default function Landing() {
         </div>
 
         {/* Tabs */}
-        <div className="flex p-1 rounded-[14px] mb-5" style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}>
-          {([["login", "تسجيل الدخول"], ["register", "إنشاء حساب"]] as const).map(([key, label]) => (
+        <div className="flex p-1 rounded-[14px] mb-5 gap-1" style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}>
+          {([["login", "دخول"], ["register", "حساب جديد"], ["admin", "لوحة التحكم"]] as const).map(([key, label]) => (
             <button
               key={key}
-              onClick={() => { setTab(key); setError(""); }}
-              className="flex-1 py-2.5 rounded-[11px] text-[13px] font-bold transition-colors"
+              onClick={() => {
+                setError("");
+                if (key === "admin" && !email) setEmail("admin@arbon.sa");
+                setTab(key);
+              }}
+              className="flex-1 py-2.5 rounded-[11px] text-[12.5px] font-bold transition-colors"
               style={{
                 background: tab === key ? "hsl(var(--foreground))" : "transparent",
                 color: tab === key ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
@@ -132,13 +159,19 @@ export default function Landing() {
           ))}
         </div>
 
+        {isAdmin && (
+          <p className="text-center text-[12px] mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>
+            الدخول للمشرفين فقط — للوصول إلى لوحة التحكم الكاملة.
+          </p>
+        )}
+
         {/* Form */}
         <form className="space-y-3.5" onSubmit={(e) => { e.preventDefault(); submit(); }}>
-          {!isLogin && (
+          {isRegister && (
             <Field label="الاسم الكامل" type="text" placeholder="اسمك الكامل" value={name} onChange={(e) => setName(e.target.value)} />
           )}
           <Field label="البريد الإلكتروني" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-          {!isLogin && (
+          {isRegister && (
             <Field label="رقم الجوال (اختياري)" type="tel" placeholder="05XXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
           )}
           <Field label="كلمة المرور" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -151,16 +184,18 @@ export default function Landing() {
             className="w-full py-4 rounded-[15px] text-sm font-extrabold mt-1 transition-transform active:scale-[0.98]"
             style={{ background: "linear-gradient(135deg, #F2F3F4, #C4C8CE)", color: "#1A1B1E", opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? "جاري..." : isLogin ? "تسجيل الدخول" : "إنشاء حساب"}
+            {loading ? "جاري..." : isAdmin ? "دخول لوحة التحكم" : isRegister ? "إنشاء حساب" : "تسجيل الدخول"}
           </button>
         </form>
 
-        <p className="text-center text-[13px] mt-6" style={{ color: "hsl(var(--muted-foreground))" }}>
-          {isLogin ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
-          <span className="font-bold cursor-pointer" style={{ color: "hsl(var(--foreground))" }} onClick={() => { setTab(isLogin ? "register" : "login"); setError(""); }}>
-            {isLogin ? "إنشاء حساب جديد" : "تسجيل الدخول"}
-          </span>
-        </p>
+        {!isAdmin && (
+          <p className="text-center text-[13px] mt-6" style={{ color: "hsl(var(--muted-foreground))" }}>
+            {isRegister ? "لديك حساب بالفعل؟ " : "ليس لديك حساب؟ "}
+            <span className="font-bold cursor-pointer" style={{ color: "hsl(var(--foreground))" }} onClick={() => { setTab(isRegister ? "login" : "register"); setError(""); }}>
+              {isRegister ? "تسجيل الدخول" : "إنشاء حساب جديد"}
+            </span>
+          </p>
+        )}
       </div>
     </div>
   );
