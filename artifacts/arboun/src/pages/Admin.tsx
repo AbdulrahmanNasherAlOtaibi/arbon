@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 
 const TOKEN_KEY = "arbon_admin_token";
 
 type Overview = {
+  dbConnected?: boolean;
   counts: Record<string, number>;
   dealsByStatus: Record<string, number>;
   money: { held: number; released: number; refunded: number; forfeited: number };
@@ -195,10 +197,13 @@ export default function Admin() {
   const [savedMsg, setSavedMsg] = useState("");
   const [editRow, setEditRow] = useState<Record<string, unknown> | null>(null);
 
+  const [, navigate] = useLocation();
+
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setOverview(null);
+    navigate("/");
   }
 
   useEffect(() => {
@@ -291,6 +296,12 @@ export default function Admin() {
 
       <div style={{ padding: 20, display: "grid", gap: 16, maxWidth: 1100, margin: "0 auto" }}>
         {error && <div style={{ ...card, color: "#CB6060" }}>{error}</div>}
+
+        {overview && overview.dbConnected === false && (
+          <div style={{ ...card, borderColor: "rgba(208,168,79,0.4)", color: "#D0A84F", fontSize: 13, fontWeight: 700, lineHeight: 1.8 }}>
+            ⚠️ قاعدة البيانات غير مربوطة — لن تظهر بيانات حتى تضبط متغيّر البيئة <span style={{ direction: "ltr", display: "inline-block" }}>DATABASE_URL</span> في إعدادات الاستضافة (مثلاً قاعدة Neon المجانية). بعد ربطها تُنشأ الجداول وتُملأ البيانات تلقائياً.
+          </div>
+        )}
 
         {overview && (
           <>

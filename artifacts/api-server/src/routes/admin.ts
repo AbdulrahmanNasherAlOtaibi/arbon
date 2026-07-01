@@ -66,47 +66,62 @@ router.use("/admin", requireAdmin);
 
 // ── Overview (counts + money totals + reconciliation) ────────────────────────
 router.get("/admin/overview", async (_req, res): Promise<void> => {
-  const [users, deals, disputes, transfers, entries, funds, approvals, templates] = await Promise.all([
-    db.select().from(usersTable),
-    db.select().from(dealsTable),
-    db.select().from(disputesTable),
-    db.select().from(transferRequestsTable),
-    db.select().from(ledgerEntriesTable),
-    db.select().from(dealFundsTable),
-    db.select().from(approvalsTable),
-    db.select().from(templatesTable),
-  ]);
+  try {
+    const [users, deals, disputes, transfers, entries, funds, approvals, templates] = await Promise.all([
+      db.select().from(usersTable),
+      db.select().from(dealsTable),
+      db.select().from(disputesTable),
+      db.select().from(transferRequestsTable),
+      db.select().from(ledgerEntriesTable),
+      db.select().from(dealFundsTable),
+      db.select().from(approvalsTable),
+      db.select().from(templatesTable),
+    ]);
 
-  const sumFunds = (state: string) =>
-    funds.filter((f) => f.state === state).reduce((s, f) => s + Number(f.heldAmount), 0);
+    const sumFunds = (state: string) =>
+      funds.filter((f) => f.state === state).reduce((s, f) => s + Number(f.heldAmount), 0);
 
-  const reconcile = await ledger.reconcile();
+    const reconcile = await ledger.reconcile();
 
-  res.json({
-    counts: {
-      users: users.length,
-      deals: deals.length,
-      disputes: disputes.length,
-      transfers: transfers.length,
-      ledgerEntries: entries.length,
-      approvals: approvals.length,
-      templates: templates.length,
-    },
-    dealsByStatus: deals.reduce<Record<string, number>>((acc, d) => {
-      acc[d.status] = (acc[d.status] ?? 0) + 1;
-      return acc;
-    }, {}),
-    money: {
-      held: sumFunds("held"),
-      released: sumFunds("released"),
-      refunded: sumFunds("refunded"),
-      forfeited: sumFunds("forfeited"),
-    },
-    reconcile,
-    verifiedUsers: users.filter((u) => u.verified).length,
-    openDisputes: disputes.filter((d) => d.status === "open" || d.status === "under_review").length,
-    pendingApprovals: approvals.filter((a) => a.status === "pending").length,
-  });
+    res.json({
+      dbConnected: true,
+      counts: {
+        users: users.length,
+        deals: deals.length,
+        disputes: disputes.length,
+        transfers: transfers.length,
+        ledgerEntries: entries.length,
+        approvals: approvals.length,
+        templates: templates.length,
+      },
+      dealsByStatus: deals.reduce<Record<string, number>>((acc, d) => {
+        acc[d.status] = (acc[d.status] ?? 0) + 1;
+        return acc;
+      }, {}),
+      money: {
+        held: sumFunds("held"),
+        released: sumFunds("released"),
+        refunded: sumFunds("refunded"),
+        forfeited: sumFunds("forfeited"),
+      },
+      reconcile,
+      verifiedUsers: users.filter((u) => u.verified).length,
+      openDisputes: disputes.filter((d) => d.status === "open" || d.status === "under_review").length,
+      pendingApprovals: approvals.filter((a) => a.status === "pending").length,
+    });
+  } catch {
+    // No database connected — return an empty, valid overview instead of 500.
+    res.json({
+      dbConnected: false,
+      counts: { users: 0, deals: 0, disputes: 0, transfers: 0, ledgerEntries: 0, approvals: 0, templates: 0 },
+      dealsByStatus: {},
+      money: { held: 0, released: 0, refunded: 0, forfeited: 0 },
+      reconcile: { debits: 0, credits: 0, balanced: true },
+      verifiedUsers: 0,
+      openDisputes: 0,
+      pendingApprovals: 0,
+    });
+  }
 });
 
 // ── Raw tables ───────────────────────────────────────────────────────────────
@@ -115,7 +130,11 @@ const table = (
   run: () => Promise<unknown[]>,
 ) =>
   router.get(`/admin/${path}`, async (_req, res): Promise<void> => {
-    res.json(await run());
+    try {
+      res.json(await run());
+    } catch {
+      res.json([]); // no DB / query failed — show an empty table, not a 500
+    }
   });
 
 table("users", () => db.select().from(usersTable).orderBy(desc(usersTable.id)));
