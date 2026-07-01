@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
 const TOKEN_KEY = "arbon_admin_token";
@@ -197,6 +197,8 @@ export default function Admin() {
   const [settings, setSettings] = useState<Record<string, string> | null>(null);
   const [savedMsg, setSavedMsg] = useState("");
   const [editRow, setEditRow] = useState<Record<string, unknown> | null>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [, navigate] = useLocation();
 
@@ -219,22 +221,37 @@ export default function Admin() {
   function onLogoFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("الرجاء اختيار ملف صورة (PNG أو JPG أو SVG).");
+      e.target.value = "";
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
+      const raw = String(reader.result);
       const img = new Image();
       img.onload = () => {
-        const max = 256;
-        const scale = Math.min(1, max / Math.max(img.width, img.height));
-        const w = Math.max(1, Math.round(img.width * scale));
-        const h = Math.max(1, Math.round(img.height * scale));
-        const canvas = document.createElement("canvas");
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext("2d")?.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL("image/png");
-        setSettings((s) => ({ ...(s ?? {}), logoUrl: dataUrl }));
+        try {
+          const max = 256;
+          const scale = Math.min(1, max / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext("2d")?.drawImage(img, 0, 0, w, h);
+          setSettings((s) => ({ ...(s ?? {}), logoUrl: canvas.toDataURL("image/png") }));
+        } catch {
+          // Canvas conversion failed (e.g. some SVGs) — use the original if small.
+          if (raw.length < 2_000_000) setSettings((s) => ({ ...(s ?? {}), logoUrl: raw }));
+          else alert("الصورة كبيرة جداً، جرّب صورة أصغر.");
+        }
       };
-      img.src = String(reader.result);
+      img.onerror = () => {
+        if (raw.length < 2_000_000) setSettings((s) => ({ ...(s ?? {}), logoUrl: raw }));
+        else alert("تعذّرت قراءة الصورة.");
+      };
+      img.src = raw;
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -380,16 +397,17 @@ export default function Admin() {
               </div>
               <div>
                 <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 12, marginBottom: 6 }}>شعار المنصة (صورة)</div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <label style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))", borderRadius: 10, padding: "8px 16px", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>
-                    رفع صورة
-                    <input type="file" accept="image/*" style={{ display: "none" }} onChange={onLogoFile} />
-                  </label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button type="button" onClick={() => photoRef.current?.click()} style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))", border: "none", borderRadius: 10, padding: "8px 16px", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>📷 من الصور</button>
+                  <button type="button" onClick={() => fileRef.current?.click()} style={{ background: "hsl(var(--input))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>📁 من الملفات</button>
                   {settings.logoUrl && (
-                    <button onClick={() => setSettings({ ...settings, logoUrl: "" })} style={{ background: "rgba(203,96,96,0.14)", color: "#CB6060", border: "1px solid rgba(203,96,96,0.25)", borderRadius: 10, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>إزالة</button>
+                    <button type="button" onClick={() => setSettings({ ...settings, logoUrl: "" })} style={{ background: "rgba(203,96,96,0.14)", color: "#CB6060", border: "1px solid rgba(203,96,96,0.25)", borderRadius: 10, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>إزالة</button>
                   )}
                 </div>
-                <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 11, marginTop: 6 }}>PNG/JPG — تُصغَّر تلقائياً. اضغط «حفظ» بعد الرفع.</div>
+                {/* Photo library picker (image types) and general Files picker */}
+                <input ref={photoRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onLogoFile} />
+                <input ref={fileRef} type="file" accept="image/*,.png,.jpg,.jpeg,.webp,.svg" style={{ display: "none" }} onChange={onLogoFile} />
+                <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 11, marginTop: 6 }}>PNG/JPG — تُصغَّر تلقائياً. اضغط «حفظ» بعد الاختيار.</div>
               </div>
             </div>
 
