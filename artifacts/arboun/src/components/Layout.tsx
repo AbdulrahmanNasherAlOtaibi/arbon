@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useGetMe } from "@workspace/api-client-react";
 import { useTx } from "@/lib/translations";
+import brandLogo from "@/assets/logo.png";
 
 /** Site brand (name + tagline + logo) controlled from the admin panel. */
 function useBrand() {
@@ -17,33 +18,13 @@ function useBrand() {
 }
 
 function ShieldLogo({ size = 32, logoUrl }: { size?: number; logoUrl?: string }) {
-  if (logoUrl) {
-    return <img src={logoUrl} alt="logo" style={{ width: size, height: size, objectFit: "contain", borderRadius: Math.round(size * 0.2) }} />;
-  }
+  const src = logoUrl || brandLogo;
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" aria-label="عربون">
-      <defs>
-        <linearGradient id="arboun-metal-h" x1="12%" y1="0%" x2="88%" y2="100%">
-          <stop offset="0%" stopColor="#F6F7F8" />
-          <stop offset="34%" stopColor="#AAB0B8" />
-          <stop offset="62%" stopColor="#D8DCE0" />
-          <stop offset="100%" stopColor="#878D95" />
-        </linearGradient>
-        <radialGradient id="arboun-sphere-h" cx="38%" cy="32%" r="78%">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="46%" stopColor="#C7CCD2" />
-          <stop offset="100%" stopColor="#7C828B" />
-        </radialGradient>
-      </defs>
-      {/* two interlocking hexagonal halves */}
-      <g stroke="url(#arboun-metal-h)" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M46 10 L86 30 L86 70 L55 87" />
-        <path d="M54 90 L14 70 L14 30 L45 13" />
-      </g>
-      {/* central sphere */}
-      <circle cx="50" cy="50" r="11" fill="url(#arboun-sphere-h)" />
-      <circle cx="46" cy="46" r="3.4" fill="#FFFFFF" opacity="0.65" />
-    </svg>
+    <img
+      src={src}
+      alt="عربون"
+      style={{ width: size, height: size, objectFit: "contain", borderRadius: logoUrl ? Math.round(size * 0.2) : 0 }}
+    />
   );
 }
 
