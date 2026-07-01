@@ -232,7 +232,7 @@ export default function Admin() {
       const img = new Image();
       img.onload = () => {
         try {
-          const max = 256;
+          const max = 200;
           const scale = Math.min(1, max / Math.max(img.width, img.height));
           const w = Math.max(1, Math.round(img.width * scale));
           const h = Math.max(1, Math.round(img.height * scale));
@@ -240,15 +240,26 @@ export default function Admin() {
           canvas.width = w;
           canvas.height = h;
           canvas.getContext("2d")?.drawImage(img, 0, 0, w, h);
-          setSettings((s) => ({ ...(s ?? {}), logoUrl: canvas.toDataURL("image/png") }));
+          // Keep the encoded logo small so it always fits in the settings
+          // payload: PNG first (preserves transparency), then JPEG if too big.
+          const LIMIT = 90_000; // chars ≈ ~65 KB
+          let url = canvas.toDataURL("image/png");
+          for (const q of [0.85, 0.7, 0.55, 0.4]) {
+            if (url.length <= LIMIT) break;
+            url = canvas.toDataURL("image/jpeg", q);
+          }
+          if (url.length > LIMIT) {
+            alert("تعذّر ضغط الصورة بما يكفي، جرّب صورة أبسط أو أصغر.");
+            return;
+          }
+          setSettings((s) => ({ ...(s ?? {}), logoUrl: url }));
         } catch {
-          // Canvas conversion failed (e.g. some SVGs) — use the original if small.
-          if (raw.length < 2_000_000) setSettings((s) => ({ ...(s ?? {}), logoUrl: raw }));
-          else alert("الصورة كبيرة جداً، جرّب صورة أصغر.");
+          if (raw.length < 90_000) setSettings((s) => ({ ...(s ?? {}), logoUrl: raw }));
+          else alert("تعذّر معالجة الصورة، جرّب صورة أصغر.");
         }
       };
       img.onerror = () => {
-        if (raw.length < 2_000_000) setSettings((s) => ({ ...(s ?? {}), logoUrl: raw }));
+        if (raw.length < 90_000) setSettings((s) => ({ ...(s ?? {}), logoUrl: raw }));
         else alert("تعذّرت قراءة الصورة.");
       };
       img.src = raw;
