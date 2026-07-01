@@ -150,6 +150,21 @@ CREATE TABLE IF NOT EXISTS approvals (
   created_at timestamp NOT NULL DEFAULT now(),
   decided_at timestamp
 );
+
+-- Password column for email auth (added to existing users tables too).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password text;
+
+-- Editable, site-wide settings the admin controls (single row, id = 1).
+CREATE TABLE IF NOT EXISTS site_settings (
+  id serial PRIMARY KEY,
+  site_name text NOT NULL DEFAULT 'عربون',
+  tagline text NOT NULL DEFAULT 'ثقتك محفوظة',
+  platform_fee_percent numeric(5,2) NOT NULL DEFAULT '2',
+  support_email text NOT NULL DEFAULT 'support@arbon.sa',
+  support_phone text NOT NULL DEFAULT '920000000',
+  about_text text NOT NULL DEFAULT 'منصّة ضمان رقمية تحفظ مبلغ العربون بين البائع والمشتري حتى إتمام الصفقة.'
+);
+INSERT INTO site_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 `;
 
 export async function ensureSchema(db: AnyDb): Promise<void> {

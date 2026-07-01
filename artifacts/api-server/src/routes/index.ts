@@ -11,6 +11,8 @@ import templatesRouter from "./templates";
 import transfersRouter from "./transfers";
 import escrowRouter from "./escrow";
 import adminRouter from "./admin";
+import authRouter from "./auth";
+import settingsRouter from "./settings";
 
 const router: IRouter = Router();
 
@@ -39,8 +41,11 @@ function ensureChecked(): Promise<void> {
 
 router.use(healthRouter);
 
-// Admin panel talks to the real database directly (never the mock fallback).
+// Admin panel, auth and site settings talk to the real database directly
+// (never the mock fallback).
 router.use(adminRouter);
+router.use(authRouter);
+router.use(settingsRouter);
 
 router.use(async (_req, _res, next) => {
   await ensureChecked();

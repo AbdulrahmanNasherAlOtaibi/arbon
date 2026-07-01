@@ -1,7 +1,20 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useGetMe } from "@workspace/api-client-react";
 import { useTx } from "@/lib/translations";
+
+/** Site brand (name + tagline) controlled from the admin panel. */
+function useBrand() {
+  const [brand, setBrand] = useState({ siteName: "عربون", tagline: "ثقتك محفوظة" });
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((s) => s?.siteName && setBrand({ siteName: s.siteName, tagline: s.tagline }))
+      .catch(() => {});
+  }, []);
+  return brand;
+}
 
 function ShieldLogo({ size = 32 }: { size?: number }) {
   return (
@@ -37,6 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { data: user } = useGetMe();
   const tx = useTx();
+  const brand = useBrand();
 
   const navItems = [
     {
@@ -116,8 +130,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2.5">
             <ShieldLogo size={30} />
             <div className="leading-none">
-              <p className="font-extrabold text-base leading-none" style={{ color: "hsl(var(--foreground))" }}>عربون</p>
-              <p className="text-[9px] mt-0.5 tracking-widest" style={{ color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>ثقتك محفوظة</p>
+              <p className="font-extrabold text-base leading-none" style={{ color: "hsl(var(--foreground))" }}>{brand.siteName}</p>
+              <p className="text-[9px] mt-0.5 tracking-widest" style={{ color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>{brand.tagline}</p>
             </div>
           </div>
           <Link href="/notifications">

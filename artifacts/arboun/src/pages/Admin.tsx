@@ -45,7 +45,7 @@ function money(n: number) {
   return `${Number(n).toLocaleString("ar-SA")} ر.س`;
 }
 
-function DataTable({ rows }: { rows: Record<string, unknown>[] }) {
+function DataTable({ rows, onDelete }: { rows: Record<string, unknown>[]; onDelete?: (id: number) => void }) {
   if (!rows.length) return <p style={{ color: "hsl(var(--muted-foreground))", padding: 16 }}>لا توجد بيانات</p>;
   const cols = Object.keys(rows[0]!);
   return (
@@ -58,6 +58,7 @@ function DataTable({ rows }: { rows: Record<string, unknown>[] }) {
                 {c}
               </th>
             ))}
+            {onDelete && <th style={{ padding: "10px 12px", borderBottom: "1px solid hsl(var(--card-border))" }} />}
           </tr>
         </thead>
         <tbody>
@@ -72,6 +73,16 @@ function DataTable({ rows }: { rows: Record<string, unknown>[] }) {
                   </td>
                 );
               })}
+              {onDelete && (
+                <td style={{ padding: "9px 12px" }}>
+                  <button
+                    onClick={() => onDelete(Number(r.id))}
+                    style={{ background: "rgba(203,96,96,0.14)", color: "#CB6060", border: "1px solid rgba(203,96,96,0.25)", borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+                  >
+                    حذف
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -139,6 +150,8 @@ export default function Admin() {
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState<Record<string, string> | null>(null);
+  const [savedMsg, setSavedMsg] = useState("");
 
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
@@ -152,7 +165,31 @@ export default function Admin() {
       if (String(e.message).includes("مصرّح") || String(e).includes("401")) logout();
       else setError(String(e.message ?? e));
     });
+    api("/admin/settings", token).then((s) => s && setSettings(s)).catch(() => {});
   }, [token]);
+
+  async function saveSettings() {
+    if (!token || !settings) return;
+    try {
+      const updated = await api("/admin/settings", token, { method: "PUT", body: JSON.stringify(settings) });
+      setSettings(updated);
+      setSavedMsg("تم الحفظ ✓");
+      setTimeout(() => setSavedMsg(""), 2000);
+    } catch (e) {
+      alert(String((e as Error).message ?? e));
+    }
+  }
+
+  async function deleteRow(rowId: number) {
+    if (!token || !Number.isFinite(rowId) || !confirm(`حذف السجل رقم ${rowId} من «${tab}»؟`)) return;
+    try {
+      await api(`/admin/${tab}/${rowId}`, token, { method: "DELETE" });
+      setRows((rs) => rs.filter((r) => Number(r.id) !== rowId));
+      api("/admin/overview", token).then(setOverview).catch(() => {});
+    } catch (e) {
+      alert(String((e as Error).message ?? e));
+    }
+  }
 
   useEffect(() => {
     if (!token) return;
@@ -223,6 +260,38 @@ export default function Admin() {
           </>
         )}
 
+        {/* Site settings — control the site details */}
+        {settings && (
+          <div style={{ ...card }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <h2 style={{ fontWeight: 800, fontSize: 15 }}>⚙️ تفاصيل الموقع</h2>
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                {savedMsg && <span style={{ color: "#5BAE7E", fontSize: 13, fontWeight: 700 }}>{savedMsg}</span>}
+                <button onClick={saveSettings} style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))", border: "none", borderRadius: 10, padding: "8px 18px", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>حفظ</button>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>
+              {([
+                ["siteName", "اسم الموقع"],
+                ["tagline", "الشعار النصّي"],
+                ["platformFeePercent", "نسبة رسوم المنصة %"],
+                ["supportEmail", "بريد الدعم"],
+                ["supportPhone", "هاتف الدعم"],
+                ["aboutText", "نبذة عن الموقع"],
+              ] as const).map(([key, label]) => (
+                <label key={key} style={{ display: "block" }}>
+                  <span style={{ display: "block", color: "hsl(var(--muted-foreground))", fontSize: 12, marginBottom: 6 }}>{label}</span>
+                  <input
+                    value={settings[key] ?? ""}
+                    onChange={(e) => setSettings({ ...settings, [key]: e.target.value })}
+                    style={{ width: "100%", background: "hsl(var(--input))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "10px 12px", color: "hsl(var(--foreground))", fontSize: 13, outline: "none" }}
+                  />
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {TABS.map(([key, label]) => (
             <button
@@ -240,7 +309,7 @@ export default function Admin() {
           ))}
         </div>
 
-        {loading ? <p style={{ color: "hsl(var(--muted-foreground))" }}>جاري التحميل...</p> : <DataTable rows={rows} />}
+        {loading ? <p style={{ color: "hsl(var(--muted-foreground))" }}>جاري التحميل...</p> : <DataTable rows={rows} onDelete={deleteRow} />}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import type { PgTable } from "drizzle-orm/pg-core";
 import {
   db,
   seedDemoData,
@@ -14,6 +15,7 @@ import {
   ledgerEntriesTable,
   dealFundsTable,
   approvalsTable,
+  siteSettingsTable,
 } from "@workspace/db";
 import * as ledger from "../domain/ledger";
 
@@ -126,6 +128,55 @@ table("transfers", () => db.select().from(transferRequestsTable).orderBy(desc(tr
 table("ledger", () => db.select().from(ledgerEntriesTable).orderBy(desc(ledgerEntriesTable.id)));
 table("funds", () => db.select().from(dealFundsTable).orderBy(desc(dealFundsTable.id)));
 table("approvals", () => db.select().from(approvalsTable).orderBy(desc(approvalsTable.id)));
+
+// ── Site settings (read / update site-wide details) ──────────────────────────
+router.get("/admin/settings", async (_req, res): Promise<void> => {
+  const [s] = await db.select().from(siteSettingsTable).where(eq(siteSettingsTable.id, 1));
+  res.json(s ?? null);
+});
+
+router.put("/admin/settings", async (req, res): Promise<void> => {
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const patch: Record<string, string> = {};
+  for (const key of ["siteName", "tagline", "platformFeePercent", "supportEmail", "supportPhone", "aboutText"]) {
+    if (typeof body[key] === "string" || typeof body[key] === "number") {
+      patch[key] = String(body[key]);
+    }
+  }
+  await db.insert(siteSettingsTable).values({ id: 1, ...patch }).onConflictDoUpdate({ target: siteSettingsTable.id, set: patch });
+  const [s] = await db.select().from(siteSettingsTable).where(eq(siteSettingsTable.id, 1));
+  res.json(s);
+});
+
+// ── Delete any row from a whitelisted table ──────────────────────────────────
+const DELETABLE: Record<string, PgTable & { id: never }> = {
+  deals: dealsTable as never,
+  users: usersTable as never,
+  disputes: disputesTable as never,
+  transfers: transferRequestsTable as never,
+  contracts: contractsTable as never,
+  timeline: timelineTable as never,
+  templates: templatesTable as never,
+  approvals: approvalsTable as never,
+  funds: dealFundsTable as never,
+  ledger: ledgerEntriesTable as never,
+};
+
+router.delete("/admin/:table/:id", async (req, res): Promise<void> => {
+  const table = DELETABLE[req.params.table as string];
+  const id = Number(req.params.id);
+  if (!table || !Number.isInteger(id)) {
+    res.status(400).json({ error: "جدول أو معرّف غير صالح" });
+    return;
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.delete(table as any).where(eq((table as any).id, id));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(409).json({ error: err instanceof Error ? err.message : "تعذّر الحذف (قد تكون هناك سجلات مرتبطة)" });
+  }
+});
 
 // ── Reload the demo dataset (full reset) ─────────────────────────────────────
 router.post("/admin/reseed", async (_req, res): Promise<void> => {

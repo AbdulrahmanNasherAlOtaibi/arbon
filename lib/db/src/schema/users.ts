@@ -8,6 +8,7 @@ export const usersTable = pgTable("users", {
   phone: text("phone").notNull().unique(),
   email: text("email"),
   nationalId: text("national_id").notNull().unique(),
+  password: text("password"),
   verified: boolean("verified").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

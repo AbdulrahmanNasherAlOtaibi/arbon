@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
 function ShieldLogo({ size = 72 }: { size?: number }) {
@@ -27,23 +27,71 @@ function ShieldLogo({ size = 72 }: { size?: number }) {
   );
 }
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: "hsl(var(--input))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: 14,
+  padding: "14px 16px",
+  color: "hsl(var(--foreground))",
+  fontSize: 14,
+  fontFamily: "'Cairo', sans-serif",
+  fontWeight: 600,
+  outline: "none",
+};
+
+function Field({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div>
+      <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</label>
+      <input style={inputStyle} {...props} />
+    </div>
+  );
+}
+
 export default function Landing() {
   const [, navigate] = useLocation();
+  const [tab, setTab] = useState<"login" | "register">("login");
+  const [brand, setBrand] = useState({ siteName: "عربون", tagline: "ثقتك محفوظة" });
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    background: "hsl(var(--input))",
-    border: "1px solid hsl(var(--border))",
-    borderRadius: 14,
-    padding: "15px 16px",
-    color: "hsl(var(--foreground))",
-    fontSize: 14,
-    fontFamily: "'Cairo', sans-serif",
-    fontWeight: 600,
-    outline: "none",
-  };
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((s) => s?.siteName && setBrand({ siteName: s.siteName, tagline: s.tagline }))
+      .catch(() => {});
+  }, []);
+
+  async function submit() {
+    setLoading(true);
+    setError("");
+    try {
+      const path = tab === "login" ? "/api/auth/login" : "/api/auth/register";
+      const body = tab === "login" ? { email, password } : { name, email, phone, password };
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? "حدث خطأ");
+      localStorage.setItem("arbon_user_token", data.token);
+      localStorage.setItem("arbon_user", JSON.stringify(data.user));
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حدث خطأ");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const isLogin = tab === "login";
 
   return (
     <div
@@ -56,74 +104,58 @@ export default function Landing() {
     >
       <div className="w-full max-w-sm px-6">
         {/* Brand */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <ShieldLogo size={80} />
           </div>
-          <h1 className="text-3xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>عربون</h1>
-          <p className="text-sm font-semibold tracking-widest" style={{ color: "hsl(var(--muted-foreground))" }}>ثقتك محفوظة</p>
+          <h1 className="text-3xl font-extrabold mb-2" style={{ color: "hsl(var(--foreground))" }}>{brand.siteName}</h1>
+          <p className="text-sm font-semibold tracking-widest" style={{ color: "hsl(var(--muted-foreground))" }}>{brand.tagline}</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex p-1 rounded-[14px] mb-5" style={{ background: "hsl(var(--input))", border: "1px solid hsl(var(--border))" }}>
+          {([["login", "تسجيل الدخول"], ["register", "إنشاء حساب"]] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => { setTab(key); setError(""); }}
+              className="flex-1 py-2.5 rounded-[11px] text-[13px] font-bold transition-colors"
+              style={{
+                background: tab === key ? "hsl(var(--foreground))" : "transparent",
+                color: tab === key ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
+              }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Form */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>رقم الجوال</label>
-            <input
-              type="tel"
-              placeholder="05XXXXXXXX"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              style={inputStyle}
-            />
-          </div>
-          <div>
-            <label className="block text-[12.5px] font-bold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>كلمة المرور</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={inputStyle}
-            />
-          </div>
-        </div>
+        <form className="space-y-3.5" onSubmit={(e) => { e.preventDefault(); submit(); }}>
+          {!isLogin && (
+            <Field label="الاسم الكامل" type="text" placeholder="اسمك الكامل" value={name} onChange={(e) => setName(e.target.value)} />
+          )}
+          <Field label="البريد الإلكتروني" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          {!isLogin && (
+            <Field label="رقم الجوال (اختياري)" type="tel" placeholder="05XXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          )}
+          <Field label="كلمة المرور" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-        {/* Login button */}
-        <button
-          className="w-full py-4 rounded-[15px] text-sm font-extrabold mt-5 transition-transform active:scale-[0.98]"
-          style={{ background: "linear-gradient(135deg, #F2F3F4, #C4C8CE)", color: "#1A1B1E" }}
-          onClick={() => navigate("/dashboard")}
-        >
-          تسجيل الدخول
-        </button>
+          {error && <p className="text-[13px] font-semibold" style={{ color: "#CB6060" }}>{error}</p>}
 
-        <div className="text-center mt-4">
-          <span className="text-[12.5px] font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
-            نسيت كلمة المرور؟
-          </span>
-        </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-5">
-          <div className="flex-1 h-px" style={{ background: "hsl(var(--border))" }} />
-          <span className="text-[11px]" style={{ color: "hsl(var(--muted-foreground))" }}>أو</span>
-          <div className="flex-1 h-px" style={{ background: "hsl(var(--border))" }} />
-        </div>
-
-        {/* National ID */}
-        <button
-          className="w-full py-4 rounded-[15px] text-sm font-extrabold transition-transform active:scale-[0.98]"
-          style={{ background: "transparent", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
-          onClick={() => navigate("/dashboard")}
-        >
-          الدخول عبر نفاذ الوطني
-        </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 rounded-[15px] text-sm font-extrabold mt-1 transition-transform active:scale-[0.98]"
+            style={{ background: "linear-gradient(135deg, #F2F3F4, #C4C8CE)", color: "#1A1B1E", opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? "جاري..." : isLogin ? "تسجيل الدخول" : "إنشاء حساب"}
+          </button>
+        </form>
 
         <p className="text-center text-[13px] mt-6" style={{ color: "hsl(var(--muted-foreground))" }}>
-          ليس لديك حساب؟{" "}
-          <span className="font-bold cursor-pointer" style={{ color: "hsl(var(--foreground))" }}
-            onClick={() => navigate("/dashboard")}>
-            إنشاء حساب جديد
+          {isLogin ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
+          <span className="font-bold cursor-pointer" style={{ color: "hsl(var(--foreground))" }} onClick={() => { setTab(isLogin ? "register" : "login"); setError(""); }}>
+            {isLogin ? "إنشاء حساب جديد" : "تسجيل الدخول"}
           </span>
         </p>
       </div>
