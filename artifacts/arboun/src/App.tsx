@@ -17,6 +17,7 @@ import TransferRequests from "@/pages/TransferRequests";
 import Landing from "@/pages/Landing";
 import Notifications from "@/pages/Notifications";
 import Settings from "@/pages/Settings";
+import Admin from "@/pages/Admin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/transfers/my-listings" component={MyListings} />
       <Route path="/transfers/requests" component={TransferRequests} />
       <Route path="/notifications" component={Notifications} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );

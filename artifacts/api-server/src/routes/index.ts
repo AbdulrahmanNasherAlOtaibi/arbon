@@ -10,6 +10,7 @@ import dashboardRouter from "./dashboard";
 import templatesRouter from "./templates";
 import transfersRouter from "./transfers";
 import escrowRouter from "./escrow";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -37,6 +38,9 @@ function ensureChecked(): Promise<void> {
 }
 
 router.use(healthRouter);
+
+// Admin panel talks to the real database directly (never the mock fallback).
+router.use(adminRouter);
 
 router.use(async (_req, _res, next) => {
   await ensureChecked();
